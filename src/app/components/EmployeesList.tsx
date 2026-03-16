@@ -1,12 +1,42 @@
-import { Link } from "react-router";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
 import { mockEmployees } from "../data/mockData";
 import { Plus, Search, Star, Download, Upload, ChevronDown } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { EmployeeWizard } from "./EmployeeWizard";
 
 export function EmployeesList() {
+  const navigate = useNavigate();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isQuotaEmpty, setIsQuotaEmpty] = useState(false);
+
+  // Проверяем состояние квоты при монтировании и изменениях
+  useEffect(() => {
+    const checkQuotaStatus = () => {
+      const quotaEmpty = localStorage.getItem("verifix_test_quota_empty") === "true";
+      setIsQuotaEmpty(quotaEmpty);
+    };
+
+    checkQuotaStatus();
+
+    // Слушаем изменения в localStorage
+    const handleStorageChange = () => {
+      checkQuotaStatus();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const handleAddEmployee = () => {
+    if (isQuotaEmpty) {
+      // Если квота исчерпана - переходим на страницу ручного создания
+      navigate("/employee/create");
+    } else {
+      // Если квота есть - открываем визард поиска
+      setIsWizardOpen(true);
+    }
+  };
 
   return (
     <div className="p-6">
@@ -42,7 +72,7 @@ export function EmployeesList() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setIsWizardOpen(true)}
+              onClick={handleAddEmployee}
               className="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 transition-colors flex items-center gap-2"
             >
               <Plus size={18} />

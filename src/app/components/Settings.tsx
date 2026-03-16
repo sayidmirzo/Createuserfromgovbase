@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 import {
   Settings as SettingsIcon,
   Users,
@@ -186,6 +185,28 @@ export function Settings() {
   const [quotaUsed, setQuotaUsed] = useState(3247);
   const [searchQuery, setSearchQuery] = useState("");
   
+  // Настройка для базовых данных при ручном создании
+  const [enableBasicDataOnManual, setEnableBasicDataOnManual] = useState(() => {
+    return localStorage.getItem("verifix_enable_basic_data_manual") === "true";
+  });
+
+  // Временный переключатель для теста - обнуление квоты
+  const [isQuotaEmpty, setIsQuotaEmpty] = useState(() => {
+    return localStorage.getItem("verifix_test_quota_empty") === "true";
+  });
+
+  const handleBasicDataToggle = (checked: boolean) => {
+    setEnableBasicDataOnManual(checked);
+    localStorage.setItem("verifix_enable_basic_data_manual", checked.toString());
+    window.dispatchEvent(new Event("storage"));
+  };
+
+  const handleQuotaEmptyToggle = (checked: boolean) => {
+    setIsQuotaEmpty(checked);
+    localStorage.setItem("verifix_test_quota_empty", checked.toString());
+    window.dispatchEvent(new Event("storage"));
+  };
+  
   const quotaPercentage = (quotaUsed / quotaLimit) * 100;
 
   const tabs = [
@@ -363,6 +384,79 @@ export function Settings() {
                   </div>
                 </div>
                 
+                {/* Basic Data Toggle */}
+                <div className="bg-white rounded-lg border-2 border-blue-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                        <Info size={18} className="text-blue-600" />
+                        Базовые данные при ручном создании
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        При исчерпании квоты разрешить ввод ПИНФЛ в форме ручного создания для загрузки базовых данных (ФИО, дата рождения, пол, адрес) из госбазы без расхода квоты
+                      </p>
+                    </div>
+                    <Switch
+                      checked={enableBasicDataOnManual}
+                      onCheckedChange={handleBasicDataToggle}
+                      className="data-[state=checked]:bg-[#4a7dff]"
+                    />
+                  </div>
+                  {enableBasicDataOnManual && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+                    >
+                      <div className="flex items-start gap-2">
+                        <Info size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-blue-800">
+                          <p className="font-medium mb-1">Функция активна</p>
+                          <p className="text-xs">
+                            При исчерпании квоты в форме ручного создания сотрудника появится возможность ввести ПИНФЛ для бесплатной загрузки базовых данных. Паспортные данные, регион и фото останутся недоступны.
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Test Mode: Empty Quota Toggle */}
+                <div className="bg-white rounded-lg border-2 border-amber-200 p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                        <AlertCircle size={18} className="text-amber-600" />
+                        Тестовый режим: исчерпание квоты
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Временный режим для тестирования функционала при нулевой квоте. Система будет вести себя так, как если бы квота была исчерпана
+                      </p>
+                    </div>
+                    <Switch
+                      checked={isQuotaEmpty}
+                      onCheckedChange={handleQuotaEmptyToggle}
+                      className="data-[state=checked]:bg-amber-600"
+                    />
+                  </div>
+                  {isQuotaEmpty && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg"
+                    >
+                      <div className="flex items-start gap-2">
+                        <AlertCircle size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-amber-800">
+                          <p className="font-medium mb-1">⚠️ Тестовый режим активен</p>
+                          <p className="text-xs">
+                            Квота считается исчерпанной. Поиск в госбазе будет недоступен, форма ручного создания сотрудника откроется автоматически при попытке добавления.
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
               </motion.div>
             )}
 

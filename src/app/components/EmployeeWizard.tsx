@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -161,6 +162,7 @@ export function EmployeeWizard({
   onClose,
   onSuccess,
 }: EmployeeWizardProps) {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<WizardStep>("search");
   const [searchState, setSearchState] = useState<SearchState>("idle");
   const [searchMethod, setSearchMethod] = useState<"pinfl" | "passport">(
@@ -283,6 +285,11 @@ export function EmployeeWizard({
     onClose();
   };
 
+  const handleNavigateToCreate = () => {
+    handleClose();
+    navigate("/employee/create");
+  };
+
   // Mock local database
   const mockLocalEmployees: ExistingEmployee[] = [
     {
@@ -292,7 +299,7 @@ export function EmployeeWizard({
       department: "Отдел продаж",
       isHired: true,
       isVerified: false,
-      pinfl: "31234567890123",
+      pinfl: "30001851234567",
       passport: "AB 1234567",
       employmentStatus: "active",
     },
@@ -304,7 +311,7 @@ export function EmployeeWizard({
       isHired: true,
       isVerified: true,
       lastVerified: "2026-03-01",
-      pinfl: "41234567890124",
+      pinfl: "40101901234568",
       passport: "CD 7654321",
       employmentStatus: "active",
     },
@@ -315,49 +322,98 @@ export function EmployeeWizard({
       department: "Финансы",
       isHired: false,
       isVerified: false,
-      pinfl: "55555555555555",
+      pinfl: "50203921234569",
       passport: "EF 9876543",
-      employmentStatus: "pending",
+      employmentStatus: "active",
+    },
+    {
+      id: "4",
+      name: "Каримов Алишер Рахимович",
+      position: "Программист",
+      department: "IT-отдел",
+      isHired: false,
+      isVerified: true,
+      lastVerified: "2026-03-10",
+      pinfl: "60305931234570",
+      passport: "GH 5554321",
+      employmentStatus: "active",
+    },
+    {
+      id: "5",
+      name: "Усманова Дилбар Шавкатовна",
+      position: "HR-менеджер",
+      department: "Персонал",
+      isHired: false,
+      isVerified: false,
+      pinfl: "71112941234571",
+      passport: "IJ 8889876",
+      employmentStatus: "terminated",
+    },
+    {
+      id: "6",
+      name: "Хасанов Фарход Баходирович",
+      position: "Водитель",
+      department: "Логистика",
+      isHired: false,
+      isVerified: true,
+      lastVerified: "2026-02-15",
+      pinfl: "80507951234572",
+      passport: "KL 1112345",
+      employmentStatus: "terminated",
+    },
+    {
+      id: "7",
+      name: "Рахимов Тимур Олегович",
+      position: "Дизайнер",
+      department: "Маркетинг",
+      isHired: false,
+      isVerified: false,
+      pinfl: "90808961234573",
+      passport: "MN 3334567",
+      employmentStatus: "active",
     },
   ];
 
   // Mock government database
   const mockGovernmentData: Record<string, SearchResult> = {
-    "00000000000000": {
-      pinfl: "00000000000000",
-      firstName: "Тестовый",
-      lastName: "Сотрудник",
-      middleName: "Тестович",
-      passport: "AA 0000000",
-      birthDate: "01.01.2000",
+    // 1. ✅ Успешный поиск - новый сотрудник (не в локальной базе)
+    "12345678901234": {
+      pinfl: "12345678901234",
+      firstName: "Азиз",
+      lastName: "Ахмедов",
+      middleName: "Рашидович",
+      passport: "AC 5551234",
+      birthDate: "15.03.1990",
       gender: "Мужской",
       nationality: "Узбекистан",
-      address: "г. Ташкент, ул. Тестовая, д. 1",
+      address: "г. Ташкент, ул. Навои, д. 25",
       region: "Ташкент",
       photoUrl: "https://i.pravatar.cc/150?img=12",
       found: true,
     },
-    "11111111111111": {
-      pinfl: "11111111111111",
-      firstName: "Алексей",
-      lastName: "Сидоров",
-      middleName: "Александрович",
-      passport: "EF 1111111",
-      birthDate: "01.01.1990",
-      gender: "Мужской",
+    "98765432109876": {
+      pinfl: "98765432109876",
+      firstName: "Нигора",
+      lastName: "Каримова",
+      middleName: "Алишеровна",
+      passport: "AD 7778899",
+      birthDate: "22.07.1988",
+      gender: "Женский",
       nationality: "Узбекистан",
-      address: "г. Ташкент, ул. Примерная, д. 1",
-      region: "Ташкент",
-      photoUrl: "https://i.pravatar.cc/150?img=13",
+      address: "г. Самарканд, ул. Регистан, д. 10",
+      region: "Самарканд",
+      photoUrl: "https://i.pravatar.cc/150?img=45",
       found: true,
     },
-    "31234567890123": {
-      pinfl: "31234567890123",
+    
+    // 6. 👥 Дубликат - уже в локальной системе (не подтвержден)
+    "30001851234567": {
+      pinfl: "30001851234567",
       firstName: "Иван",
       lastName: "Иванов",
       middleName: "Иванович",
       passport: "AB 1234567",
-      birthDate: "15.05.1985",
+      birthDate: "18.01.2000",
       gender: "Мужской",
       nationality: "Узбекистан",
       address: "г. Ташкент, ул. Мирабадская, д. 10",
@@ -365,13 +421,15 @@ export function EmployeeWizard({
       photoUrl: "https://i.pravatar.cc/150?img=33",
       found: true,
     },
-    "41234567890124": {
-      pinfl: "41234567890124",
+    
+    // 6. 👥 Дубликат - уже в локальной системе (подтвержден, принят)
+    "40101901234568": {
+      pinfl: "40101901234568",
       firstName: "Петр",
       lastName: "Петров",
       middleName: "Петрович",
       passport: "CD 7654321",
-      birthDate: "20.08.1975",
+      birthDate: "19.10.2001",
       gender: "Мужской",
       nationality: "Узбекистан",
       address: "г. Ташкент, ул. Центральная, д. 5",
@@ -379,18 +437,84 @@ export function EmployeeWizard({
       photoUrl: "https://i.pravatar.cc/150?img=14",
       found: true,
     },
-    "55555555555555": {
-      pinfl: "55555555555555",
-      firstName: "Ольга",
-      lastName: "Смирнова",
+    
+    // 6. 👥 Дубликат - не подтвержден, не принят
+    "50203921234569": {
+      pinfl: "50203921234569",
+      firstName: "Мария",
+      lastName: "Сидорова",
       middleName: "Викторовна",
-      passport: "AB 1234567",
-      birthDate: "10.03.1992",
+      passport: "EF 9876543",
+      birthDate: "20.03.1992",
       gender: "Женский",
       nationality: "Узбекистан",
-      address: "г. Ташкент, ул. Навои, д. 15",
+      address: "г. Ташкент, ул. Навои, д. 30",
       region: "Ташкент",
-      photoUrl: "https://i.pravatar.cc/150?img=44",
+      photoUrl: "https://i.pravatar.cc/150?img=47",
+      found: true,
+    },
+    
+    // 6. 👥 Дубликат - подтвержден, не принят
+    "60305931234570": {
+      pinfl: "60305931234570",
+      firstName: "Алишер",
+      lastName: "Каримов",
+      middleName: "Рахимович",
+      passport: "GH 5554321",
+      birthDate: "05.03.1993",
+      gender: "Мужской",
+      nationality: "Узбекистан",
+      address: "г. Ташкент, ул. Мустакиллик, д. 12",
+      region: "Ташкент",
+      photoUrl: "https://i.pravatar.cc/150?img=51",
+      found: true,
+    },
+    
+    // 6. 👥 Дубликат - не подтвержден, уволен
+    "71112941234571": {
+      pinfl: "71112941234571",
+      firstName: "Дилбар",
+      lastName: "Усманова",
+      middleName: "Шавкатовна",
+      passport: "IJ 8889876",
+      birthDate: "12.11.1994",
+      gender: "Женский",
+      nationality: "Узбекистан",
+      address: "г. Самарканд, ул. Амира Темура, д. 8",
+      region: "Самарканд",
+      photoUrl: "https://i.pravatar.cc/150?img=48",
+      found: true,
+    },
+    
+    // 6. 👥 Дубликат - подтвержден, уволен
+    "80507951234572": {
+      pinfl: "80507951234572",
+      firstName: "Фарход",
+      lastName: "Хасанов",
+      middleName: "Баходирович",
+      passport: "KL 1112345",
+      birthDate: "07.05.1995",
+      gender: "Мужской",
+      nationality: "Узбекистан",
+      address: "г. Бухара, ул. Шахристан, д. 20",
+      region: "Бухара",
+      photoUrl: "https://i.pravatar.cc/150?img=52",
+      found: true,
+    },
+    
+    // 7. ⚠️ КОНФЛИКТ - данные в госбазе отличаются от локальных
+    "90808961234573": {
+      pinfl: "90808961234573",
+      firstName: "Тимур",
+      lastName: "Рахимов",
+      middleName: "Шавкатович", // В локальной базе: Олегович - КОНФЛИКТ!
+      passport: "MN 9998888", // В локальной базе: MN 3334567 - КОНФЛИКТ!
+      birthDate: "08.08.1996",
+      gender: "Мужской",
+      nationality: "Узбекистан",
+      address: "г. Ташкент, ул. Амира Темура, д. 40",
+      region: "Ташкент",
+      photoUrl: "https://i.pravatar.cc/150?img=53",
       found: true,
     },
   };
@@ -436,20 +560,7 @@ export function EmployeeWizard({
       ? pinfl.replace(/\s/g, "") 
       : passport.replace(/\s/g, "");
 
-    // Test cases
-    if (searchKey === "99999999999999") {
-      setSearchState("invalid-input");
-      setIsSearching(false);
-      toast.error("Неверный формат данных");
-      setTimeout(() => {
-        searchResultRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }, 100);
-      return;
-    }
-
+    // 3. 🔴 Ошибка API/сервера
     if (searchKey === "88888888888888") {
       setSearchState("api-error");
       setCurrentQuota((prev) => Math.max(0, prev - 1));
@@ -464,6 +575,7 @@ export function EmployeeWizard({
       return;
     }
 
+    // 4. 📡 Нет соединения
     if (searchKey === "77777777777777") {
       setSearchState("no-connection");
       setIsSearching(false);
@@ -558,9 +670,8 @@ export function EmployeeWizard({
       return;
     }
 
-    // Not found
+    // 2. ❌ Не найден в госбазе (квота НЕ тратится!)
     setSearchState("not-found");
-    setCurrentQuota((prev) => Math.max(0, prev - 1));
     toast.error("Не найдено в госбазе");
     setIsSearching(false);
     setTimeout(() => {
@@ -707,21 +818,83 @@ export function EmployeeWizard({
 
   return (
     <TooltipProvider>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <motion.div
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className={`flex flex-col items-center gap-4 w-full ${
+          currentStep === "search" ? "max-w-2xl" : "max-w-6xl"
+        }`}>
+          {/* Quota Panel */}
+          {currentStep === "search" && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 shadow-lg border border-blue-200"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Info size={18} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-blue-900">
+                      Квота: Март 2026
+                    </h3>
+                    <p className="text-xs text-blue-700">
+                      {isQuotaLow
+                        ? `Осталось ${currentQuota} запросов`
+                        : "Доступно запросов к госбазе"}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xl font-bold text-blue-900">
+                    {currentQuota}
+                  </div>
+                  <div className="text-xs text-blue-700">из {maxQuota}</div>
+                </div>
+              </div>
+              
+              {/* Animated Progress Bar */}
+              <div className="relative w-full bg-blue-200 rounded-full h-2.5 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${quotaPercentage}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className={`h-full rounded-full transition-colors duration-500 ${
+                    isQuotaLow
+                      ? "bg-orange-500"
+                      : "bg-gradient-to-r from-[#1bc5bd] to-[#0ea89e]"
+                  }`}
+                >
+                  <div className="h-full w-full bg-white/20 animate-pulse" />
+                </motion.div>
+              </div>
+              
+              <p className="text-xs text-blue-600 mt-2.5">
+                Поиск в госбазе и обновление данных расходуют квоту
+              </p>
+            </motion.div>
+          )}
+
+          {/* Modal Window */}
+          <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+          className={`bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-hidden flex flex-col ${
+            currentStep === "search" ? "max-w-2xl" : "max-w-6xl"
+          }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+          <div className={`flex items-center justify-between border-b border-gray-200 ${
+            currentStep === "search" ? "px-6 py-5" : "px-8 py-6"
+          }`}>
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
-                <UserPlus size={20} className="text-teal-600" />
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <UserPlus size={24} className="text-[#4a7dff]" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900">
                   {currentStep === "search" && "Добавить сотрудника"}
                   {currentStep === "result" && "Результат поиска"}
                   {currentStep === "manual" && "Ручное добавление"}
@@ -734,81 +907,13 @@ export function EmployeeWizard({
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              {/* Step Indicator */}
-              {currentStep !== "manual" && (
-                <div className="flex items-center gap-3">
-                  {steps.map((step, index) => (
-                    <div key={step.key} className="flex items-center gap-3">
-                      <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                        className={`flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-300 ${
-                          index <= currentStepIndex
-                            ? "bg-teal-600 shadow-lg shadow-teal-600/30"
-                            : "bg-gray-100"
-                        }`}
-                      >
-                        {/* Circle with icon/number */}
-                        <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                            index < currentStepIndex
-                              ? "bg-white text-teal-600"
-                              : index === currentStepIndex
-                              ? "bg-white text-teal-600 ring-2 ring-white/50"
-                              : "bg-white text-gray-400"
-                          }`}
-                        >
-                          {index < currentStepIndex ? (
-                            <motion.div
-                              initial={{ scale: 0, rotate: -180 }}
-                              animate={{ scale: 1, rotate: 0 }}
-                              transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                            >
-                              <Check size={14} strokeWidth={3} />
-                            </motion.div>
-                          ) : (
-                            <span>{index + 1}</span>
-                          )}
-                        </div>
-                        
-                        {/* Label */}
-                        <span className={`text-xs font-semibold whitespace-nowrap transition-colors duration-300 ${
-                          index <= currentStepIndex
-                            ? "text-white"
-                            : "text-gray-500"
-                        }`}>
-                          {step.label}
-                        </span>
-                      </motion.div>
-                      
-                      {/* Connector line */}
-                      {index < steps.length - 1 && (
-                        <div className="relative w-8 h-0.5 overflow-hidden rounded-full bg-gray-200">
-                          <motion.div
-                            className="absolute inset-0 bg-teal-600"
-                            initial={{ x: "-100%" }}
-                            animate={{ 
-                              x: index < currentStepIndex ? "0%" : "-100%"
-                            }}
-                            transition={{ duration: 0.5, ease: "easeInOut" }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              <button
-                type="button"
-                onClick={handleClose}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
-              >
-                <X size={20} />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           {/* Content */}
@@ -820,7 +925,7 @@ export function EmployeeWizard({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="p-8"
+                className="p-6"
               >
               {currentStep === "search" && (
                 <SearchStep
@@ -837,10 +942,6 @@ export function EmployeeWizard({
                   isSearching={isSearching}
                   handleSearch={handleSearch}
                   setCurrentStep={setCurrentStep}
-                  currentQuota={currentQuota}
-                  maxQuota={maxQuota}
-                  quotaPercentage={quotaPercentage}
-                  isQuotaLow={isQuotaLow}
                   searchState={searchState}
                   searchResultRef={searchResultRef}
                   pinflInputRef={pinflInputRef}
@@ -849,6 +950,7 @@ export function EmployeeWizard({
                   setPinflTouched={setPinflTouched}
                   passportTouched={passportTouched}
                   setPassportTouched={setPassportTouched}
+                  handleNavigateToCreate={handleNavigateToCreate}
                 />
               )}
 
@@ -873,6 +975,7 @@ export function EmployeeWizard({
                   showHireForm={showHireForm}
                   setShowHireForm={setShowHireForm}
                   handleHireSubmit={handleHireSubmit}
+                  handleNavigateToCreate={handleNavigateToCreate}
                 />
               )}
 
@@ -890,6 +993,7 @@ export function EmployeeWizard({
           </AnimatePresence>
           </div>
         </motion.div>
+        </div>
       </div>
     </TooltipProvider>
   );
@@ -922,6 +1026,7 @@ function SearchStep({
   setPinflTouched,
   passportTouched,
   setPassportTouched,
+  handleNavigateToCreate,
 }: any) {
   const pinflValidation = pinfl ? validatePinfl(pinfl.replace(/\s/g, "")) : { valid: false };
   const passportValidation = passport ? validatePassport(passport.replace(/\s/g, "")) : { valid: false };
@@ -937,57 +1042,10 @@ function SearchStep({
   };
 
   return (
-    <div className="space-y-8 max-w-3xl mx-auto">
-      {/* Quota Panel */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Info size={20} className="text-blue-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-blue-900">
-                Квота: Март 2026
-              </h3>
-              <p className="text-sm text-blue-700">
-                {isQuotaLow
-                  ? `Осталось ${currentQuota} запросов`
-                  : "Доступно запросов к госбазе"}
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-blue-900">
-              {currentQuota}
-            </div>
-            <div className="text-sm text-blue-700">из {maxQuota}</div>
-          </div>
-        </div>
-        
-        {/* Animated Progress Bar */}
-        <div className="relative w-full bg-blue-200 rounded-full h-3 overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${quotaPercentage}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className={`h-full rounded-full transition-colors duration-500 ${
-              isQuotaLow
-                ? "bg-orange-500"
-                : "bg-gradient-to-r from-[#1bc5bd] to-[#0ea89e]"
-            }`}
-          >
-            <div className="h-full w-full bg-white/20 animate-pulse" />
-          </motion.div>
-        </div>
-        
-        <p className="text-xs text-blue-600 mt-3">
-          Поиск в госбазе и обновление данных расходуют квоту
-        </p>
-      </div>
-
+    <div className="space-y-6">
       {/* Search Method Toggle */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 mb-2.5">
           Способ поиска
         </label>
         <div className="inline-flex items-center bg-gray-100 p-1.5 rounded-lg">
@@ -1111,10 +1169,20 @@ function SearchStep({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <div className="text-xs space-y-1">
+                  <div className="text-xs space-y-1.5 max-w-xs">
                     <p className="font-semibold">Формат ПИНФЛ:</p>
                     <p>• 14 цифр</p>
                     <p>• Пример: 12345 67890 1234</p>
+                    <div className="border-t border-gray-200 pt-1.5 mt-1.5">
+                      <p className="font-semibold mb-1">Будут загружены данные:</p>
+                      <p>• ФИО (Фамилия, Имя, Отчество)</p>
+                      <p>• Фотография</p>
+                      <p>• Пол</p>
+                      <p>• Дата рождения</p>
+                      <p>• ИИН</p>
+                      <p>• Адрес регистрации</p>
+                      <p>• Гражданство</p>
+                    </div>
                   </div>
                 </TooltipContent>
               </Tooltip>
@@ -1204,11 +1272,21 @@ function SearchStep({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <div className="text-xs space-y-1">
+                    <div className="text-xs space-y-1.5 max-w-xs">
                       <p className="font-semibold">Формат паспорта:</p>
-                      <p>• 2 заглавные бу��вы</p>
+                      <p>• 2 заглавные буквы</p>
                       <p>• 7 цифр</p>
                       <p>• Пример: AB 1234567</p>
+                      <div className="border-t border-gray-200 pt-1.5 mt-1.5">
+                        <p className="font-semibold mb-1">Будут загружены данные:</p>
+                        <p>• ФИО (Фамилия, Имя, Отчество)</p>
+                        <p>• Фотография</p>
+                        <p>• Пол</p>
+                        <p>• Дата рождения</p>
+                        <p>• ИИН</p>
+                        <p>• Адрес регистрации</p>
+                        <p>• Гражданство</p>
+                      </div>
                     </div>
                   </TooltipContent>
                 </Tooltip>
@@ -1231,41 +1309,42 @@ function SearchStep({
         )}
       </div>
 
+
+
       {/* Consent Checkbox */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 hover:bg-amber-100 hover:border-amber-300 transition-all cursor-pointer group">
-        <div className="flex items-start gap-3">
-          <Checkbox
-            id="consent"
-            checked={consentChecked}
-            onCheckedChange={(checked) => setConsentChecked(checked as boolean)}
-            className="mt-1"
-          />
-          <Label htmlFor="consent" className="text-sm leading-relaxed text-gray-700 cursor-pointer">
-            Даю согласие на обработку персональных данных в соответствии с{" "}
-            <a 
-              href="#" 
-              onClick={(e) => e.preventDefault()}
-              className="text-teal-600 hover:text-teal-700 underline font-medium transition-colors"
-            >
-              политикой конфиденциальности
-            </a>
-          </Label>
-        </div>
+      <div className="flex items-center gap-2.5">
+        <Checkbox
+          id="consent"
+          checked={consentChecked}
+          onCheckedChange={(checked) => setConsentChecked(checked as boolean)}
+          className="shrink-0"
+        />
+        <Label htmlFor="consent" className="text-sm text-gray-700 cursor-pointer">
+          Даю согласие на обработку персональных данных в соответствии с <a href="#" onClick={(e) => e.preventDefault()} className="text-[#4a7dff] hover:text-[#3a6de8] underline font-medium transition-colors">политикой конфиденциальности</a>
+        </Label>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-4">
+      <div className="flex items-center justify-end gap-3 pt-5">
+        <Button
+          variant="outline"
+          onClick={handleNavigateToCreate}
+          className="px-7 h-10"
+        >
+          <UserPlus size={18} className="mr-2" />
+          Добавить вручную
+        </Button>
+        
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               onClick={handleSearch}
               disabled={isSearching || !consentChecked}
-              size="lg"
-              className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-12 text-base font-medium shadow-lg shadow-teal-600/30 disabled:opacity-50"
+              className="bg-[#4a7dff] hover:bg-[#3a6de8] text-white px-7 h-10 shadow-md shadow-blue-500/25 disabled:opacity-50"
             >
               {isSearching ? (
                 <>
-                  <Loader2 size={20} className="animate-spin mr-2" />
+                  <Loader2 size={18} className="animate-spin mr-2" />
                   <span>Поиск в госбазе</span>
                   <motion.span
                     className="ml-1"
@@ -1277,7 +1356,7 @@ function SearchStep({
                 </>
               ) : (
                 <>
-                  <Search size={20} className="mr-2" />
+                  <Search size={18} className="mr-2" />
                   Добавить из госбазы
                 </>
               )}
@@ -1289,16 +1368,6 @@ function SearchStep({
             </TooltipContent>
           )}
         </Tooltip>
-        
-        <Button
-          variant="outline"
-          onClick={() => setCurrentStep("manual")}
-          size="lg"
-          className="h-12 px-8 text-base font-medium border-2"
-        >
-          <UserPlus size={20} className="mr-2" />
-          Добавить вручную
-        </Button>
       </div>
 
       {/* Search Result Notifications */}
@@ -1310,7 +1379,7 @@ function SearchStep({
           className="mt-6"
         >
           {searchState === "not-found" && (
-            <NotFoundAlert setCurrentStep={setCurrentStep} />
+            <NotFoundAlert setCurrentStep={setCurrentStep} handleNavigateToCreate={handleNavigateToCreate} />
           )}
           {searchState === "invalid-input" && <InvalidInputAlert />}
           {searchState === "api-error" && <ApiErrorAlert />}
@@ -1322,47 +1391,47 @@ function SearchStep({
 }
 
 // Notification Components
-function NotFoundAlert({ setCurrentStep }: any) {
+function NotFoundAlert({ setCurrentStep, handleNavigateToCreate }: any) {
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-6 shadow-sm">
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <HelpCircle size={24} className="text-blue-600" />
+    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <HelpCircle size={20} className="text-blue-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">
+          <h3 className="text-base font-semibold text-blue-900 mb-1.5">
             Не найдено в госба��е
           </h3>
-          <p className="text-sm text-blue-700 mb-4 leading-relaxed">
+          <p className="text-sm text-blue-700 mb-3 leading-relaxed">
             По указанным данным информация в государственной базе не найдена.
             Возможно, данные были введены некорректно или сотрудник отсутствует
             в системе.
           </p>
-          <div className="bg-white/60 rounded-lg p-4 mb-4">
-            <p className="font-semibold text-blue-900 mb-2 text-sm">Рекомендации:</p>
-            <ul className="space-y-2">
+          <div className="bg-white/60 rounded-lg p-3 mb-3">
+            <p className="font-semibold text-blue-900 mb-1.5 text-sm">Рекомендации:</p>
+            <ul className="space-y-1.5">
               <li className="flex items-start gap-2 text-sm text-blue-700">
-                <span className="text-blue-400 mt-1">•</span>
+                <span className="text-blue-400 mt-0.5">•</span>
                 <span>Проверьте правильность введенного ПИНФЛ или паспорта</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-blue-700">
-                <span className="text-blue-400 mt-1">•</span>
+                <span className="text-blue-400 mt-0.5">•</span>
                 <span>Убедитесь, что дата рождения указана верно</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-blue-700">
-                <span className="text-blue-400 mt-1">•</span>
+                <span className="text-blue-400 mt-0.5">•</span>
                 <span>Попробуйте использовать альтернативный способ поиска</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-blue-700">
-                <span className="text-blue-400 mt-1">•</span>
+                <span className="text-blue-400 mt-0.5">•</span>
                 <span>Добавьте сотрудника вручную, если данные отсутствуют в госбазе</span>
               </li>
             </ul>
           </div>
           <Button
             variant="outline"
-            onClick={() => setCurrentStep("manual")}
-            className="border-[#4a7dff]/40 hover:bg-[#4a7dff]/5 text-[#4a7dff] font-medium"
+            onClick={handleNavigateToCreate}
+            className="border-[#4a7dff]/40 hover:bg-[#4a7dff]/5 text-[#4a7dff] font-medium h-9"
           >
             <UserPlus size={16} className="mr-2" />
             Добавить вручную
@@ -1375,32 +1444,32 @@ function NotFoundAlert({ setCurrentStep }: any) {
 
 function InvalidInputAlert() {
   return (
-    <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-xl p-6 shadow-sm">
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <AlertTriangle size={24} className="text-orange-600" />
+    <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-xl p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <AlertTriangle size={20} className="text-orange-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-orange-900 mb-2">
+          <h3 className="text-base font-semibold text-orange-900 mb-1.5">
             Неверный формат данных
           </h3>
-          <p className="text-sm text-orange-700 mb-4 leading-relaxed">
+          <p className="text-sm text-orange-700 mb-3 leading-relaxed">
             Введенные данные не соответствуют формату, принятому в
             государственной базе данных.
           </p>
-          <div className="bg-white/60 rounded-lg p-4">
-            <p className="font-semibold text-orange-900 mb-2 text-sm">Возможные причины:</p>
-            <ul className="space-y-2">
+          <div className="bg-white/60 rounded-lg p-3">
+            <p className="font-semibold text-orange-900 mb-1.5 text-sm">Возможные причины:</p>
+            <ul className="space-y-1.5">
               <li className="flex items-start gap-2 text-sm text-orange-700">
-                <span className="text-orange-400 mt-1">•</span>
+                <span className="text-orange-400 mt-0.5">•</span>
                 <span>ПИНФЛ содержит недопустимые символы</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-orange-700">
-                <span className="text-orange-400 mt-1">•</span>
+                <span className="text-orange-400 mt-0.5">•</span>
                 <span>Неверная серия или номер ��аспорта</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-orange-700">
-                <span className="text-orange-400 mt-1">•</span>
+                <span className="text-orange-400 mt-0.5">•</span>
                 <span>Дата рождения не соответствует формату</span>
               </li>
             </ul>
@@ -1413,32 +1482,32 @@ function InvalidInputAlert() {
 
 function ApiErrorAlert() {
   return (
-    <div className="bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200 rounded-xl p-6 shadow-sm">
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <XCircle size={24} className="text-red-600" />
+    <div className="bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200 rounded-xl p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <XCircle size={20} className="text-red-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-red-900 mb-2">
+          <h3 className="text-base font-semibold text-red-900 mb-1.5">
             Ошибка при обращении к госбазе
           </h3>
-          <p className="text-sm text-red-700 mb-4 leading-relaxed">
+          <p className="text-sm text-red-700 mb-3 leading-relaxed">
             Не удалось получить данные из государственной базы. Возможно,
             сервис временно недоступен или произошла техническая ошибка.
           </p>
-          <div className="bg-white/60 rounded-lg p-4">
-            <p className="font-semibold text-red-900 mb-2 text-sm">Что делать:</p>
-            <ul className="space-y-2">
+          <div className="bg-white/60 rounded-lg p-3">
+            <p className="font-semibold text-red-900 mb-1.5 text-sm">Что делать:</p>
+            <ul className="space-y-1.5">
               <li className="flex items-start gap-2 text-sm text-red-700">
-                <span className="text-red-400 mt-1">•</span>
+                <span className="text-red-400 mt-0.5">•</span>
                 <span>Попробуйте повторить запрос через несколько минут</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-red-700">
-                <span className="text-red-400 mt-1">•</span>
+                <span className="text-red-400 mt-0.5">•</span>
                 <span>Проверьте стабильность интернет-соединения</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-red-700">
-                <span className="text-red-400 mt-1">•</span>
+                <span className="text-red-400 mt-0.5">•</span>
                 <span>Если проблема сохраняется, обратитесь в техподдержку</span>
               </li>
             </ul>
@@ -1451,32 +1520,32 @@ function ApiErrorAlert() {
 
 function NoConnectionAlert() {
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-slate-50 border-2 border-gray-200 rounded-xl p-6 shadow-sm">
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <WifiOff size={24} className="text-gray-600" />
+    <div className="bg-gradient-to-br from-gray-50 to-slate-50 border-2 border-gray-200 rounded-xl p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <WifiOff size={20} className="text-gray-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-base font-semibold text-gray-900 mb-1.5">
             Нет соединения с сервером
           </h3>
-          <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+          <p className="text-sm text-gray-700 mb-3 leading-relaxed">
             Не удалось установить соединение с сервером госбазы. Проверьте
             подключение к интернету и повторите попытку.
           </p>
-          <div className="bg-white/60 rounded-lg p-4">
-            <p className="font-semibold text-gray-900 mb-2 text-sm">Рекомендации:</p>
-            <ul className="space-y-2">
+          <div className="bg-white/60 rounded-lg p-3">
+            <p className="font-semibold text-gray-900 mb-1.5 text-sm">Рекомендации:</p>
+            <ul className="space-y-1.5">
               <li className="flex items-start gap-2 text-sm text-gray-700">
-                <span className="text-gray-400 mt-1">•</span>
+                <span className="text-gray-400 mt-0.5">•</span>
                 <span>Проверьте подключение к интернету</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-gray-700">
-                <span className="text-gray-400 mt-1">•</span>
+                <span className="text-gray-400 mt-0.5">•</span>
                 <span>Убедитесь, что VPN или прокси не блокируют доступ</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-gray-700">
-                <span className="text-gray-400 mt-1">•</span>
+                <span className="text-gray-400 mt-0.5">•</span>
                 <span>Попробуйте перезагрузить страницу</span>
               </li>
             </ul>
@@ -1508,6 +1577,7 @@ function ResultStep({
   showHireForm,
   setShowHireForm,
   handleHireSubmit,
+  handleNavigateToCreate,
 }: any) {
   // Determine status for SmartPanel
   const getSmartPanelStatus = () => {
@@ -1521,6 +1591,24 @@ function ResultStep({
       return "found-duplicate-verified";
     }
     return "found-new";
+  };
+  
+  // Determine employment status for SmartPanel
+  const getEmploymentStatus = (): 'not-hired' | 'hired' | 'terminated' => {
+    if (!existingEmployee) {
+      return 'not-hired'; // Новый сотрудник из госбазы
+    }
+    
+    // Проверяем статус существующего сотрудника
+    if (existingEmployee.employmentStatus === 'terminated') {
+      return 'terminated';
+    }
+    
+    if (existingEmployee.isHired) {
+      return 'hired';
+    }
+    
+    return 'not-hired';
   };
 
   return (
@@ -1671,6 +1759,8 @@ function ResultStep({
           setPhoneNumber={setPhoneNumber}
           email={email}
           setEmail={setEmail}
+          handleUpdateData={handleUpdateData}
+          isSaving={isSaving}
         />
       )}
 
@@ -1694,7 +1784,7 @@ function ResultStep({
             <SmartPanelActions
               key="smart-panel"
               status={getSmartPanelStatus()}
-              employmentStatus="not-working"
+              employmentStatus={getEmploymentStatus()}
               isSaving={isSaving}
               onHire={() => handleEmploymentAction("work", { phone: phoneNumber, email })}
               onGPH={() => handleEmploymentAction("gph", { phone: phoneNumber, email })}
@@ -1718,6 +1808,8 @@ function EmployeeCard({
   setPhoneNumber,
   email,
   setEmail,
+  handleUpdateData,
+  isSaving,
 }: any) {
   const isVerified =
     searchState === "found-duplicate-verified" || searchState === "updated";
@@ -1781,6 +1873,12 @@ function EmployeeCard({
               </p>
               <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-teal-500 text-white">
                 Принят
+              </span>
+            </div>
+          ) : existingEmployee?.employmentStatus === 'terminated' ? (
+            <div>
+              <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-500 text-white">
+                Уволен
               </span>
             </div>
           ) : (
@@ -1864,6 +1962,37 @@ function EmployeeCard({
           )}
         </div>
       </div>
+
+      {/* Update Data Button for Unverified Employee */}
+      {isUnverified && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="pt-3 border-t border-gray-200"
+        >
+          <Button
+            type="button"
+            onClick={handleUpdateData}
+            disabled={isSaving}
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white h-10 justify-center disabled:opacity-60"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Обновление данных...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Обновить данные из госбазы
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-amber-700 mt-2 text-center">
+            После обновления данные будут синхронизированы с государственной базой
+          </p>
+        </motion.div>
+      )}
 
       {/* Contact Data for New Employee */}
       {isNew && (
@@ -1958,9 +2087,9 @@ function MergeConflictCards({
         <p className="text-xs text-gray-600 mb-3">
           Данные из выбранной записи будут использованы для объединения
         </p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 items-stretch">
           {/* Local Record */}
-          <div className="space-y-2">
+          <div className="space-y-2 flex flex-col">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
               <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
@@ -1972,7 +2101,7 @@ function MergeConflictCards({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedMergeCard("local")}
-              className={`w-full bg-gradient-to-br from-white to-gray-50 border-2 rounded-lg p-3 text-left transition-all ${
+              className={`flex-1 bg-gradient-to-br from-white to-gray-50 border-2 rounded-lg p-3 text-left transition-all ${
                 selectedMergeCard === "local"
                   ? "border-[#4a7dff] ring-2 ring-[#4a7dff]/20 shadow-lg"
                   : "border-gray-200 hover:border-gray-300 hover:shadow-md"
@@ -2017,21 +2146,21 @@ function MergeConflictCards({
                 </span>
               </div>
             )}
-            <div className="space-y-2 mt-3 pt-3 border-t border-gray-200">
+            <div className="space-y-2 mt-2 pt-2 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-500">Паспорт</span>
                 <span className="font-mono text-xs text-gray-900">{existingEmployee?.passport}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Паспорт</span>
-                <span className="font-mono text-xs text-gray-900">{existingEmployee?.passport}</span>
+                <span className="text-xs text-gray-500">ПИНФЛ</span>
+                <span className="font-mono text-xs text-gray-900">{formatPinfl(existingEmployee?.pinfl)}</span>
               </div>
             </div>
             </motion.button>
           </div>
 
           {/* Government Data */}
-          <div className="space-y-2">
+          <div className="space-y-2 flex flex-col">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
               <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
@@ -2043,7 +2172,7 @@ function MergeConflictCards({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedMergeCard("government")}
-              className={`w-full bg-gradient-to-br from-white to-gray-50 border-2 rounded-lg p-3 text-left transition-all ${
+              className={`flex-1 bg-gradient-to-br from-white to-gray-50 border-2 rounded-lg p-3 text-left transition-all ${
                 selectedMergeCard === "government"
                   ? "border-[#4a7dff] ring-2 ring-[#4a7dff]/20 shadow-lg"
                   : "border-gray-200 hover:border-gray-300 hover:shadow-md"
@@ -2086,8 +2215,8 @@ function MergeConflictCards({
                 <span className="font-mono text-xs text-gray-900">{searchResult?.passport}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Паспорт</span>
-                <span className="font-mono text-xs text-gray-900">{searchResult?.passport}</span>
+                <span className="text-xs text-gray-500">ПИНФЛ</span>
+                <span className="font-mono text-xs text-gray-900">{formatPinfl(searchResult?.pinfl)}</span>
               </div>
             </div>
             </motion.button>
@@ -2159,7 +2288,7 @@ function ManualStep({
           <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
             <UserPlus size={20} className="text-teal-600" />
           </div>
-          Личные данные
+          Личн��е данные
         </h3>
         <div className="grid grid-cols-2 gap-6">
           <div>

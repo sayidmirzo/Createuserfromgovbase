@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 
 interface SmartPanelActionsProps {
   status: 'found-new' | 'found-duplicate-unverified' | 'found-duplicate-verified' | 'merge-conflict';
-  employmentStatus?: 'working' | 'not-working' | 'fired';
+  employmentStatus?: 'not-hired' | 'hired' | 'terminated';
   isSaving?: boolean;
   onHire?: () => void;
   onGPH?: () => void;
@@ -17,7 +17,7 @@ interface SmartPanelActionsProps {
 
 export function SmartPanelActions({
   status,
-  employmentStatus = 'not-working',
+  employmentStatus = 'not-hired',
   isSaving = false,
   onHire,
   onGPH,
@@ -30,6 +30,7 @@ export function SmartPanelActions({
   const renderContent = () => {
     switch (status) {
       case 'found-new':
+        // Новый сотрудник из госбазы (всегда "Не принят")
         return (
           <>
             <div className="flex items-center justify-between mb-4">
@@ -81,163 +82,52 @@ export function SmartPanelActions({
         );
 
       case 'found-duplicate-unverified':
-        return (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                <span className="text-xs font-medium text-amber-700 uppercase tracking-wide">Требуется обновление</span>
-              </div>
-            </div>
-            
-            <h3 className="font-semibold text-gray-900 mb-2">Неподтвержденные данные</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Информация не синхронизирована с госбазой. После обновления станут доступны варианты оформления.
-            </p>
-
-            <div className="space-y-3 mb-4">
-              <Button 
-                type="button"
-                onClick={onUpdate}
-                disabled={isSaving}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white h-11 justify-start disabled:opacity-60"
-              >
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                )}
-                <span className="flex-1 text-left">
-                  {isSaving ? "Обновление..." : "Обновить данные"}
-                </span>
-                {!isSaving && <AlertCircle className="w-4 h-4 text-amber-200" />}
-              </Button>
-            </div>
-
-            <Button 
-              type="button"
-              onClick={onViewProfile}
-              variant="outline"
-              className="w-full h-11 justify-start border-gray-300"
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              <span className="flex-1 text-left">Посмотреть текущий профиль</span>
-            </Button>
-          </>
-        );
-
-      case 'found-duplicate-verified':
-        if (employmentStatus === 'working') {
+        // Не подтвержденный сотрудник - показываем действия в зависимости от статуса
+        if (employmentStatus === 'hired') {
+          // Принят, но не подтвержден - только сохранить
           return (
             <>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-[#4a7dff] rounded-full"></div>
-                  <span className="text-xs font-medium text-[#4a7dff] uppercase tracking-wide">Уже работает</span>
+                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                  <span className="text-xs font-medium text-amber-700 uppercase tracking-wide">Требуется обновление</span>
                 </div>
               </div>
               
-              <h3 className="font-semibold text-gray-900 mb-2">Активный сотрудник</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Рекомендуемое действие</h3>
               <p className="text-sm text-gray-600 mb-4">
-                Оформлен и работает в компании
+                Обновите данные из госбазы для актуализации информации
               </p>
 
-              <div className="bg-[#4a7dff]/5 rounded-lg p-4 mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-4 h-4 text-[#4a7dff]" />
-                  <span className="text-sm font-medium text-gray-900">Стаж: 2 года 3 месяца</span>
-                </div>
-                <p className="text-xs text-gray-700">Принят: 15.12.2023</p>
-              </div>
-
-              <Button 
-                type="button"
-                onClick={onViewProfile}
-                className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start mb-3"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                <span className="flex-1 text-left">Открыть профиль</span>
-              </Button>
-
-              <Button 
-                type="button"
-                onClick={onClose}
-                variant="outline"
-                className="w-full h-10 border-gray-300"
-              >
-                Закрыть визард
-              </Button>
-            </>
-          );
-        } else if (employmentStatus === 'fired') {
-          return (
-            <>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                  <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Уволен</span>
-                </div>
-              </div>
-              
-              <h3 className="font-semibold text-gray-900 mb-2">Повторный прием</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Сотрудник был уволен 12.02.2026
-              </p>
-
-              <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                <p className="text-xs text-gray-700 mb-1">
-                  <strong>Последняя должность:</strong> Старший разработчик
-                </p>
-                <p className="text-xs text-gray-700">
-                  <strong>Отработано:</strong> 1 год 8 месяцев
-                </p>
-              </div>
-
-              <div className="space-y-3 mb-4">
+              <div className="pt-4 border-t border-gray-200">
                 <Button 
                   type="button"
-                  onClick={onHire}
-                  className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  <span className="flex-1 text-left">Принять заново</span>
-                </Button>
-                
-                <Button 
-                  type="button"
-                  onClick={onGPH}
+                  onClick={onSave}
                   variant="outline"
                   className="w-full h-11 justify-start border-gray-300"
                 >
-                  <FileText className="w-4 h-4 mr-2" />
-                  <span className="flex-1 text-left">Принять на ГПХ</span>
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  <span className="flex-1 text-left">Сохранить без оформления</span>
                 </Button>
               </div>
-
-              <Button 
-                type="button"
-                onClick={onViewProfile}
-                variant="outline"
-                className="w-full h-11 justify-start border-gray-300"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                <span className="flex-1 text-left">Посмотреть историю работы</span>
-              </Button>
             </>
           );
         } else {
+          // Не принят или Уволен - показываем действия приема
           return (
             <>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-[#4a7dff] rounded-full"></div>
-                  <span className="text-xs font-medium text-[#4a7dff] uppercase tracking-wide">В системе</span>
+                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                  <span className="text-xs font-medium text-amber-700 uppercase tracking-wide">Требуется обновление</span>
                 </div>
               </div>
               
-              <h3 className="font-semibold text-gray-900 mb-2">Восстановление</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Рекомендуемое действие</h3>
               <p className="text-sm text-gray-600 mb-4">
-                Данные актуальны, готов к оформлению
+                {employmentStatus === 'terminated' 
+                  ? 'Обновите данные и оформите повторный прием на работу'
+                  : 'Обновите данные и оформите сотрудника на работу'}
               </p>
 
               <div className="space-y-3 mb-6">
@@ -246,8 +136,10 @@ export function SmartPanelActions({
                   onClick={onHire}
                   className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  <span className="flex-1 text-left">Восстановить на работе</span>
+                  <Briefcase className="w-4 h-4 mr-2" />
+                  <span className="flex-1 text-left">
+                    {employmentStatus === 'terminated' ? 'Принять заново' : 'Принять на работу'}
+                  </span>
                   <TrendingUp className="w-4 h-4 text-white/60" />
                 </Button>
                 
@@ -265,12 +157,135 @@ export function SmartPanelActions({
               <div className="pt-4 border-t border-gray-200">
                 <Button 
                   type="button"
-                  onClick={onViewProfile}
+                  onClick={onSave}
                   variant="outline"
                   className="w-full h-11 justify-start border-gray-300"
                 >
-                  <Eye className="w-4 h-4 mr-2" />
-                  <span className="flex-1 text-left">Посмотреть профиль</span>
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  <span className="flex-1 text-left">Сохранить без оформления</span>
+                </Button>
+              </div>
+            </>
+          );
+        }
+
+      case 'found-duplicate-verified':
+        // Подтвержденный сотрудник - действия в зависимости от статуса
+        if (employmentStatus === 'hired') {
+          // Уже работает - только сохранить
+          return (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#4a7dff] rounded-full"></div>
+                  <span className="text-xs font-medium text-[#4a7dff] uppercase tracking-wide">Уже работает</span>
+                </div>
+              </div>
+              
+              <h3 className="font-semibold text-gray-900 mb-2">Рекомендуемое действие</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Сотрудник уже оформлен и работает в компании
+              </p>
+
+              <div className="pt-4 border-t border-gray-200">
+                <Button 
+                  type="button"
+                  onClick={onSave}
+                  variant="outline"
+                  className="w-full h-11 justify-start border-gray-300"
+                >
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  <span className="flex-1 text-left">Сохранить без оформления</span>
+                </Button>
+              </div>
+            </>
+          );
+        } else if (employmentStatus === 'terminated') {
+          // Уволен - показать действия приема
+          return (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Уволен</span>
+                </div>
+              </div>
+              
+              <h3 className="font-semibold text-gray-900 mb-2">Рекомендуемое действие</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Повторное оформление сотрудника
+              </p>
+
+              <div className="space-y-3 mb-6">
+                <Button 
+                  type="button"
+                  onClick={onHire}
+                  className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  <span className="flex-1 text-left">Принять заново</span>
+                  <TrendingUp className="w-4 h-4 text-white/60" />
+                </Button>
+                
+                <Button 
+                  type="button"
+                  onClick={onGPH}
+                  variant="outline"
+                  className="w-full h-11 justify-start border-gray-300"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  <span className="flex-1 text-left">Принять на ГПХ</span>
+                </Button>
+              </div>
+            </>
+          );
+        } else {
+          // Не принят - показать действия приема
+          return (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#1bc5bd] rounded-full animate-pulse"></div>
+                  <span className="text-xs font-medium text-[#138b86] uppercase tracking-wide">Готов к оформлению</span>
+                </div>
+              </div>
+              
+              <h3 className="font-semibold text-gray-900 mb-2">Рекомендуемое действие</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Данные проверены и актуальны
+              </p>
+
+              <div className="space-y-3 mb-6">
+                <Button 
+                  type="button"
+                  onClick={onHire}
+                  className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start"
+                >
+                  <Briefcase className="w-4 h-4 mr-2" />
+                  <span className="flex-1 text-left">Принять на работу</span>
+                  <TrendingUp className="w-4 h-4 text-white/60" />
+                </Button>
+                
+                <Button 
+                  type="button"
+                  onClick={onGPH}
+                  variant="outline"
+                  className="w-full h-11 justify-start border-gray-300"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  <span className="flex-1 text-left">Принять на ГПХ</span>
+                </Button>
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <Button 
+                  type="button"
+                  onClick={onSave}
+                  variant="outline"
+                  className="w-full h-11 justify-start border-gray-300"
+                >
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  <span className="flex-1 text-left">Сохранить без оформления</span>
                 </Button>
               </div>
             </>
