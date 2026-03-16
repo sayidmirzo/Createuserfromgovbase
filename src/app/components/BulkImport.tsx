@@ -529,7 +529,7 @@ export function BulkImport() {
                             currentStep
                           ) >
                           ["upload", "preview", "processing", "results"].indexOf(step)
-                        ? "bg-green-500 text-white"
+                        ? "bg-[#1bc5bd] text-white"
                         : "bg-gray-200 text-gray-500"
                     }`}
                   >
@@ -545,7 +545,7 @@ export function BulkImport() {
                       className={`w-12 h-0.5 ${
                         ["upload", "preview", "processing", "results"].indexOf(currentStep) >
                         index
-                          ? "bg-green-500"
+                          ? "bg-[#1bc5bd]"
                           : "bg-gray-200"
                       }`}
                     />
@@ -607,7 +607,7 @@ export function BulkImport() {
 
                 <div className="mt-8 pt-8 border-t border-gray-200">
                   <div className="flex items-start gap-3 text-left max-w-md mx-auto">
-                    <AlertCircle size={20} className="text-blue-500 flex-shrink-0 mt-0.5" />
+                    <AlertCircle size={20} className="text-[#4a7dff] flex-shrink-0 mt-0.5" />
                     <div className="text-sm text-gray-600">
                       <strong className="text-gray-900 font-semibold">
                         Формат файла:
@@ -655,13 +655,13 @@ export function BulkImport() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg border-2 border-green-200 p-4">
+                <div className="bg-white rounded-lg border-2 border-[#d1f4f2] p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle2 size={20} className="text-green-600" />
+                    <div className="w-10 h-10 bg-[#d1f4f2] rounded-lg flex items-center justify-center">
+                      <CheckCircle2 size={20} className="text-[#1bc5bd]" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-green-900">
+                      <div className="text-2xl font-bold text-[#138b86]">
                         {readyToImportCount}
                       </div>
                       <div className="text-sm text-gray-500">Готовы к импорту</div>
@@ -698,7 +698,7 @@ export function BulkImport() {
               <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
                 {/* Bulk Actions */}
                 {(duplicateCount > 0 || errorCount > 0 || warningCount > 0) && (
-                  <div className="px-6 py-4 bg-blue-50 border-b border-blue-200">
+                  <div className="px-6 py-4 bg-[#4a7dff]/5 border-b border-[#4a7dff]/20">
                     <div className="flex items-center gap-4 flex-wrap">
                       <span className="text-sm font-medium text-gray-700">Массовые действия:</span>
                       
@@ -891,9 +891,9 @@ export function BulkImport() {
                                 row.action === "skip"
                                   ? "border-gray-300 bg-gray-50 text-gray-600"
                                   : row.action === "add"
-                                  ? "border-green-300 bg-green-50 text-green-700"
+                                  ? "border-[#d1f4f2] bg-[#e6f9f8] text-[#138b86]"
                                   : row.action === "update"
-                                  ? "border-blue-300 bg-blue-50 text-blue-700"
+                                  ? "border-[#4a7dff]/30 bg-[#4a7dff]/10 text-[#4a7dff]"
                                   : "border-purple-300 bg-purple-50 text-purple-700"
                               }`}
                             >
@@ -998,11 +998,11 @@ export function BulkImport() {
 
                   {/* Live Stats */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
+                    <div className="text-center p-4 bg-[#e6f9f8] rounded-lg">
+                      <div className="text-2xl font-bold text-[#1bc5bd]">
                         {successCount}
                       </div>
-                      <div className="text-xs text-green-700 mt-1">Успешно</div>
+                      <div className="text-xs text-[#138b86] mt-1">Успешно</div>
                     </div>
                     <div className="text-center p-4 bg-amber-50 rounded-lg">
                       <div className="text-2xl font-bold text-amber-600">
@@ -1044,13 +1044,13 @@ export function BulkImport() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg border-2 border-green-200 p-4">
+                <div className="bg-white rounded-lg border-2 border-[#d1f4f2] p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle2 size={20} className="text-green-600" />
+                    <div className="w-10 h-10 bg-[#d1f4f2] rounded-lg flex items-center justify-center">
+                      <CheckCircle2 size={20} className="text-[#1bc5bd]" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-2xl font-bold text-[#1bc5bd]">
                         {successCount}
                       </div>
                       <div className="text-xs text-gray-500">Успешно</div>
@@ -1117,7 +1117,7 @@ export function BulkImport() {
                           key={row.id}
                           className={`transition-colors ${
                             row.status === "success"
-                              ? "bg-green-50/50 hover:bg-green-50"
+                              ? "bg-[#e6f9f8]/50 hover:bg-[#e6f9f8]"
                               : row.status === "duplicate"
                               ? "bg-amber-50/50 hover:bg-amber-50"
                               : row.status === "error"
@@ -1137,7 +1137,7 @@ export function BulkImport() {
                           </td>
                           <td className="px-4 py-3">
                             {row.status === "success" && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#d1f4f2] text-[#138b86] rounded-full text-xs font-medium">
                                 <CheckCircle2 size={12} />
                                 Добавлен
                               </span>

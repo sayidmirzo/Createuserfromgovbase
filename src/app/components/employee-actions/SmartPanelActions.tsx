@@ -6,7 +6,6 @@ interface SmartPanelActionsProps {
   status: 'found-new' | 'found-duplicate-unverified' | 'found-duplicate-verified' | 'merge-conflict';
   employmentStatus?: 'working' | 'not-working' | 'fired';
   isSaving?: boolean;
-  isQuotaEmpty?: boolean;
   onHire?: () => void;
   onGPH?: () => void;
   onSave?: () => void;
@@ -20,7 +19,6 @@ export function SmartPanelActions({
   status,
   employmentStatus = 'not-working',
   isSaving = false,
-  isQuotaEmpty = false,
   onHire,
   onGPH,
   onSave,
@@ -36,8 +34,8 @@ export function SmartPanelActions({
           <>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs font-medium text-green-700 uppercase tracking-wide">Готов к оформлению</span>
+                <div className="w-2 h-2 bg-[#1bc5bd] rounded-full animate-pulse"></div>
+                <span className="text-xs font-medium text-[#138b86] uppercase tracking-wide">Готов к оформлению</span>
               </div>
             </div>
             
@@ -50,11 +48,11 @@ export function SmartPanelActions({
               <Button 
                 type="button"
                 onClick={onHire}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 justify-start"
+                className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start"
               >
                 <Briefcase className="w-4 h-4 mr-2" />
                 <span className="flex-1 text-left">Принять на работу</span>
-                <TrendingUp className="w-4 h-4 text-blue-200" />
+                <TrendingUp className="w-4 h-4 text-white/60" />
               </Button>
               
               <Button 
@@ -101,7 +99,7 @@ export function SmartPanelActions({
               <Button 
                 type="button"
                 onClick={onUpdate}
-                disabled={isSaving || isQuotaEmpty}
+                disabled={isSaving}
                 className="w-full bg-amber-600 hover:bg-amber-700 text-white h-11 justify-start disabled:opacity-60"
               >
                 {isSaving ? (
@@ -114,11 +112,6 @@ export function SmartPanelActions({
                 </span>
                 {!isSaving && <AlertCircle className="w-4 h-4 text-amber-200" />}
               </Button>
-              {isQuotaEmpty && (
-                <p className="text-xs text-red-600 -mt-1">
-                  Исчерпана квота запросов к госбазе
-                </p>
-              )}
             </div>
 
             <Button 
@@ -139,8 +132,8 @@ export function SmartPanelActions({
             <>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-xs font-medium text-blue-700 uppercase tracking-wide">Уже работает</span>
+                  <div className="w-2 h-2 bg-[#4a7dff] rounded-full"></div>
+                  <span className="text-xs font-medium text-[#4a7dff] uppercase tracking-wide">Уже работает</span>
                 </div>
               </div>
               
@@ -149,18 +142,18 @@ export function SmartPanelActions({
                 Оформлен и работает в компании
               </p>
 
-              <div className="bg-blue-50 rounded-lg p-4 mb-4">
+              <div className="bg-[#4a7dff]/5 rounded-lg p-4 mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-900">Стаж: 2 года 3 месяца</span>
+                  <Clock className="w-4 h-4 text-[#4a7dff]" />
+                  <span className="text-sm font-medium text-gray-900">Стаж: 2 года 3 месяца</span>
                 </div>
-                <p className="text-xs text-blue-700">Принят: 15.12.2023</p>
+                <p className="text-xs text-gray-700">Принят: 15.12.2023</p>
               </div>
 
               <Button 
                 type="button"
                 onClick={onViewProfile}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 justify-start mb-3"
+                className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start mb-3"
               >
                 <Eye className="w-4 h-4 mr-2" />
                 <span className="flex-1 text-left">Открыть профиль</span>
@@ -204,7 +197,7 @@ export function SmartPanelActions({
                 <Button 
                   type="button"
                   onClick={onHire}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 justify-start"
+                  className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start"
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
                   <span className="flex-1 text-left">Принять заново</span>
@@ -237,8 +230,8 @@ export function SmartPanelActions({
             <>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-xs font-medium text-blue-700 uppercase tracking-wide">В системе</span>
+                  <div className="w-2 h-2 bg-[#4a7dff] rounded-full"></div>
+                  <span className="text-xs font-medium text-[#4a7dff] uppercase tracking-wide">В системе</span>
                 </div>
               </div>
               
@@ -251,11 +244,11 @@ export function SmartPanelActions({
                 <Button 
                   type="button"
                   onClick={onHire}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 justify-start"
+                  className="w-full bg-[#4a7dff] hover:bg-[#3869e6] text-white h-11 justify-start"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   <span className="flex-1 text-left">Восстановить на работе</span>
-                  <TrendingUp className="w-4 h-4 text-blue-200" />
+                  <TrendingUp className="w-4 h-4 text-white/60" />
                 </Button>
                 
                 <Button 

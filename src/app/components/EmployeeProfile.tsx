@@ -175,7 +175,7 @@ export function EmployeeProfile() {
           </div>
 
           <div className="flex items-center gap-6 text-sm border-b border-gray-200 -mb-[1px]">
-            <button className="px-4 py-3 border-b-2 border-blue-500 text-blue-600 font-medium flex items-center gap-2">
+            <button className="px-4 py-3 border-b-2 border-[#4a7dff] text-[#4a7dff] font-medium flex items-center gap-2">
               <FileText size={16} />
               Основная информация
             </button>

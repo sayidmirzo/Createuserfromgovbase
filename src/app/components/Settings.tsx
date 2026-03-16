@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   Settings as SettingsIcon,
@@ -23,6 +24,7 @@ import {
   MoreVertical,
   Eye,
   Download,
+  Info,
 } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -42,6 +44,15 @@ const mockAuditLogs = [
   {
     id: 2,
     user: "Мария Иванова",
+    action: "Бесплатный поиск в госбазе",
+    target: "Тестовый Сотрудник (базовые данные)",
+    timestamp: "2026-03-10 14:15:30",
+    status: "info",
+    ip: "192.168.1.15",
+  },
+  {
+    id: 3,
+    user: "Мария Иванова",
     action: "Обновление данных",
     target: "Елена Смирнова",
     timestamp: "2026-03-10 13:15:42",
@@ -49,7 +60,16 @@ const mockAuditLogs = [
     ip: "192.168.1.15",
   },
   {
-    id: 3,
+    id: 4,
+    user: "Анна Николаева",
+    action: "Бесплатный поиск в госбазе",
+    target: "ПИНФЛ: 11111111111111 (частичные данные)",
+    timestamp: "2026-03-10 12:50:18",
+    status: "info",
+    ip: "192.168.1.8",
+  },
+  {
+    id: 5,
     user: "Петр Васильев",
     action: "Попытка удаления",
     target: "Дмитрий Козлов",
@@ -58,7 +78,7 @@ const mockAuditLogs = [
     ip: "192.168.1.22",
   },
   {
-    id: 4,
+    id: 6,
     user: "Анна Николаева",
     action: "Поиск в госбазе",
     target: "ПИНФЛ: 12345678901234",
@@ -67,7 +87,16 @@ const mockAuditLogs = [
     ip: "192.168.1.8",
   },
   {
-    id: 5,
+    id: 7,
+    user: "Сергей Орлов",
+    action: "Бесплатный поиск в госбазе",
+    target: "Иван Иванов (без расхода квоты)",
+    timestamp: "2026-03-10 10:35:22",
+    status: "info",
+    ip: "192.168.1.30",
+  },
+  {
+    id: 8,
     user: "Сергей Орлов",
     action: "Изменение прав доступа",
     target: "Ольга Кузнецова",
@@ -156,7 +185,7 @@ export function Settings() {
   const [quotaLimit, setQuotaLimit] = useState(10000);
   const [quotaUsed, setQuotaUsed] = useState(3247);
   const [searchQuery, setSearchQuery] = useState("");
-
+  
   const quotaPercentage = (quotaUsed / quotaLimit) * 100;
 
   const tabs = [
@@ -313,8 +342,8 @@ export function Settings() {
 
                   <div className="bg-white rounded-lg p-5 border-2 border-gray-100">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <CheckCircle2 size={20} className="text-green-600" />
+                      <div className="w-10 h-10 bg-[#d1f4f2] rounded-lg flex items-center justify-center">
+                        <CheckCircle2 size={20} className="text-[#1bc5bd]" />
                       </div>
                       <span className="text-xs text-gray-500">Успешно</span>
                     </div>
@@ -333,54 +362,7 @@ export function Settings() {
                     <div className="text-sm text-gray-500 mt-1">Время ответа</div>
                   </div>
                 </div>
-
-                {/* Quota Management */}
-                <div className="bg-white rounded-lg border-2 border-gray-200 p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
-                    Управление квотой
-                  </h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <Label className="text-sm font-semibold text-gray-700 mb-2">
-                        Установить новый лимит
-                      </Label>
-                      <div className="flex gap-3">
-                        <Input
-                          type="number"
-                          value={quotaLimit}
-                          onChange={(e) => setQuotaLimit(Number(e.target.value))}
-                          className="flex-1"
-                        />
-                        <Button className="bg-teal-600 hover:bg-teal-700">
-                          Применить
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-semibold text-gray-700 mb-2">
-                        Пополнить квоту
-                      </Label>
-                      <div className="flex gap-3">
-                        <Input type="number" placeholder="Количество" className="flex-1" />
-                        <Button variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
-                          <Plus size={16} className="mr-2" />
-                          Добавить
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-amber-800">
-                        <strong className="font-semibold">Внимание:</strong> При достижении
-                        лимита квоты система автоматически прекратит обращения к госбазе.
-                        Рекомендуем пополнить квоту заранее.
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                
               </motion.div>
             )}
 
@@ -471,7 +453,7 @@ export function Settings() {
                           </td>
                           <td className="px-6 py-4">
                             {log.status === "success" && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#d1f4f2] text-[#138b86] rounded-full text-xs font-medium">
                                 <CheckCircle2 size={12} />
                                 Успешно
                               </span>
@@ -486,6 +468,12 @@ export function Settings() {
                               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
                                 <AlertCircle size={12} />
                                 Предупреждение
+                              </span>
+                            )}
+                            {log.status === "info" && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                                <Info size={12} />
+                                Информация
                               </span>
                             )}
                           </td>
@@ -522,7 +510,7 @@ export function Settings() {
                     </div>
                     <Button className="bg-teal-600 hover:bg-teal-700">
                       <UserPlus size={16} className="mr-2" />
-                      Добавить пользователя
+                      Добавить пльзователя
                     </Button>
                   </div>
                 </div>
@@ -562,13 +550,13 @@ export function Settings() {
                           <span
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                               user.status === "active"
-                                ? "bg-green-100 text-green-700"
+                                ? "bg-[#d1f4f2] text-[#138b86]"
                                 : "bg-gray-100 text-gray-600"
                             }`}
                           >
                             <span
                               className={`w-1.5 h-1.5 rounded-full ${
-                                user.status === "active" ? "bg-green-500" : "bg-gray-400"
+                                user.status === "active" ? "bg-[#1bc5bd]" : "bg-gray-400"
                               }`}
                             />
                             {user.status === "active" ? "Активен" : "Неактивен"}
@@ -586,7 +574,7 @@ export function Settings() {
                             {user.permissions.map((perm) => (
                               <span
                                 key={perm}
-                                className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium"
+                                className="px-2 py-0.5 bg-[#4a7dff]/10 text-[#4a7dff] rounded text-xs font-medium"
                               >
                                 {perm === "read" && "Чтение"}
                                 {perm === "write" && "Запись"}
@@ -668,7 +656,7 @@ export function Settings() {
                                 className="sr-only peer"
                                 defaultChecked={branch.status === "active"}
                               />
-                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#4a7dff]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4a7dff]"></div>
                             </label>
                           </div>
 
@@ -690,13 +678,13 @@ export function Settings() {
                               <span
                                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                                   branch.status === "active"
-                                    ? "bg-green-100 text-green-700"
+                                    ? "bg-[#d1f4f2] text-[#138b86]"
                                     : "bg-gray-100 text-gray-600"
                                 }`}
                               >
                                 <span
                                   className={`w-1.5 h-1.5 rounded-full ${
-                                    branch.status === "active" ? "bg-green-500" : "bg-gray-400"
+                                    branch.status === "active" ? "bg-[#1bc5bd]" : "bg-gray-400"
                                   }`}
                                 />
                                 {branch.status === "active" ? "Активен" : "Неактивен"}

@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
-  Shield,
   RefreshCw,
   XCircle,
   UserX,
@@ -65,11 +64,11 @@ interface SearchResult {
   middleName: string;
   passport: string;
   birthDate: string;
-  gender?: string;
+  gender: string;
   nationality: string;
   address: string;
   region: string;
-  photoUrl?: string;
+  photoUrl: string;
   found: boolean;
 }
 
@@ -174,7 +173,6 @@ export function EmployeeWizard({
   // Quota state
   const maxQuota = 100;
   const [currentQuota, setCurrentQuota] = useState(86);
-  const isQuotaEmpty = currentQuota <= 0;
   const isQuotaLow = currentQuota <= 5;
   const quotaPercentage = (currentQuota / maxQuota) * 100;
 
@@ -251,7 +249,7 @@ export function EmployeeWizard({
 
       // Enter to search (only on search step)
       if (e.key === "Enter" && currentStep === "search") {
-        if (!isSearching && consentChecked && !isQuotaEmpty) {
+        if (!isSearching && consentChecked) {
           handleSearch();
         }
       }
@@ -259,7 +257,7 @@ export function EmployeeWizard({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, currentStep, isSearching, consentChecked, isQuotaEmpty]);
+  }, [isOpen, currentStep, isSearching, consentChecked]);
 
   // Reset wizard
   const resetWizard = () => {
@@ -310,10 +308,35 @@ export function EmployeeWizard({
       passport: "CD 7654321",
       employmentStatus: "active",
     },
+    {
+      id: "3",
+      name: "Сидорова Мария Викторовна",
+      position: "Бухгалтер",
+      department: "Финансы",
+      isHired: false,
+      isVerified: false,
+      pinfl: "55555555555555",
+      passport: "EF 9876543",
+      employmentStatus: "pending",
+    },
   ];
 
   // Mock government database
   const mockGovernmentData: Record<string, SearchResult> = {
+    "00000000000000": {
+      pinfl: "00000000000000",
+      firstName: "Тестовый",
+      lastName: "Сотрудник",
+      middleName: "Тестович",
+      passport: "AA 0000000",
+      birthDate: "01.01.2000",
+      gender: "Мужской",
+      nationality: "Узбекистан",
+      address: "г. Ташкент, ул. Тестовая, д. 1",
+      region: "Ташкент",
+      photoUrl: "https://i.pravatar.cc/150?img=12",
+      found: true,
+    },
     "11111111111111": {
       pinfl: "11111111111111",
       firstName: "Алексей",
@@ -325,6 +348,7 @@ export function EmployeeWizard({
       nationality: "Узбекистан",
       address: "г. Ташкент, ул. Примерная, д. 1",
       region: "Ташкент",
+      photoUrl: "https://i.pravatar.cc/150?img=13",
       found: true,
     },
     "31234567890123": {
@@ -338,6 +362,7 @@ export function EmployeeWizard({
       nationality: "Узбекистан",
       address: "г. Ташкент, ул. Мирабадская, д. 10",
       region: "Ташкент",
+      photoUrl: "https://i.pravatar.cc/150?img=33",
       found: true,
     },
     "41234567890124": {
@@ -351,6 +376,7 @@ export function EmployeeWizard({
       nationality: "Узбекистан",
       address: "г. Ташкент, ул. Центральная, д. 5",
       region: "Ташкент",
+      photoUrl: "https://i.pravatar.cc/150?img=14",
       found: true,
     },
     "55555555555555": {
@@ -364,6 +390,7 @@ export function EmployeeWizard({
       nationality: "Узбекистан",
       address: "г. Ташкент, ул. Навои, д. 15",
       region: "Ташкент",
+      photoUrl: "https://i.pravatar.cc/150?img=44",
       found: true,
     },
   };
@@ -457,6 +484,29 @@ export function EmployeeWizard({
 
     if (localMatch) {
       const govData = mockGovernmentData[localMatch.pinfl];
+      
+      // Check for data conflict between local and government records
+      if (govData) {
+        const hasNameConflict = 
+          `${govData.lastName} ${govData.firstName} ${govData.middleName}` !== localMatch.name;
+        
+        const hasPassportConflict = 
+          localMatch.passport.replace(/\s/g, "") !== govData.passport.replace(/\s/g, "");
+        
+        if (hasNameConflict || hasPassportConflict) {
+          // Data conflict detected!
+          setSearchState("found-merge-conflict");
+          setSearchResult(govData);
+          setExistingEmployee(localMatch);
+          setConflictEmployee(localMatch);
+          setCurrentQuota((prev) => Math.max(0, prev - 1));
+          toast.warning("Обнаружен конфликт данных");
+          setCurrentStep("result");
+          setIsSearching(false);
+          return;
+        }
+      }
+      
       setExistingEmployee(localMatch);
       setSearchResult(govData || null);
 
@@ -467,6 +517,8 @@ export function EmployeeWizard({
         setSearchState("found-duplicate-unverified");
         toast.warning("Сотрудник найден в локальной базе (не подтвержден)");
       }
+      
+      setCurrentQuota((prev) => Math.max(0, prev - 1));
       setCurrentStep("result");
       setIsSearching(false);
       return;
@@ -477,11 +529,12 @@ export function EmployeeWizard({
 
     if (govData) {
       // Check for merge conflict
-      const conflictingEmployee = mockLocalEmployees.find(
-        (emp) =>
+      const conflictingEmployee = mockLocalEmployees.find((emp) => {
+        return (
           (emp.pinfl === govData.pinfl && emp.passport.replace(/\s/g, "") !== govData.passport.replace(/\s/g, "")) ||
           (emp.passport.replace(/\s/g, "") === govData.passport.replace(/\s/g, "") && emp.pinfl !== govData.pinfl)
-      );
+        );
+      });
 
       if (conflictingEmployee) {
         setSearchState("found-merge-conflict");
@@ -782,7 +835,6 @@ export function EmployeeWizard({
                   consentChecked={consentChecked}
                   setConsentChecked={setConsentChecked}
                   isSearching={isSearching}
-                  isQuotaEmpty={isQuotaEmpty}
                   handleSearch={handleSearch}
                   setCurrentStep={setCurrentStep}
                   currentQuota={currentQuota}
@@ -810,7 +862,6 @@ export function EmployeeWizard({
                   selectedMergeCard={selectedMergeCard}
                   setSelectedMergeCard={setSelectedMergeCard}
                   isSaving={isSaving}
-                  isQuotaEmpty={isQuotaEmpty}
                   handleUpdateData={handleUpdateData}
                   handleMergeSelect={handleMergeSelect}
                   handleEmploymentAction={handleEmploymentAction}
@@ -857,7 +908,6 @@ function SearchStep({
   consentChecked,
   setConsentChecked,
   isSearching,
-  isQuotaEmpty,
   handleSearch,
   setCurrentStep,
   currentQuota,
@@ -900,9 +950,7 @@ function SearchStep({
                 Квота: Март 2026
               </h3>
               <p className="text-sm text-blue-700">
-                {isQuotaEmpty
-                  ? "Квота исчерпана"
-                  : isQuotaLow
+                {isQuotaLow
                   ? `Осталось ${currentQuota} запросов`
                   : "Доступно запросов к госбазе"}
               </p>
@@ -923,22 +971,18 @@ function SearchStep({
             animate={{ width: `${quotaPercentage}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             className={`h-full rounded-full transition-colors duration-500 ${
-              isQuotaEmpty
-                ? "bg-red-500"
-                : isQuotaLow
+              isQuotaLow
                 ? "bg-orange-500"
-                : "bg-gradient-to-r from-green-500 to-emerald-500"
+                : "bg-gradient-to-r from-[#1bc5bd] to-[#0ea89e]"
             }`}
           >
             <div className="h-full w-full bg-white/20 animate-pulse" />
           </motion.div>
         </div>
         
-        {!isQuotaEmpty && (
-          <p className="text-xs text-blue-600 mt-3">
-            Поиск в госбазе и обновление данных расходуют квоту
-          </p>
-        )}
+        <p className="text-xs text-blue-600 mt-3">
+          Поиск в госбазе и обновление данных расходуют квоту
+        </p>
       </div>
 
       {/* Search Method Toggle */}
@@ -1003,7 +1047,7 @@ function SearchStep({
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="flex items-center gap-1 text-green-600 text-xs font-medium"
+                      className="flex items-center gap-1 text-[#1bc5bd] text-xs font-medium"
                     >
                       <CheckCircle2 size={14} />
                       Корректный формат
@@ -1037,7 +1081,7 @@ function SearchStep({
                 className={`h-12 text-lg pr-10 transition-all ${
                   pinflTouched && pinfl
                     ? pinflValidation.valid
-                      ? "border-green-300 focus:border-green-500 focus:ring-green-500"
+                      ? "border-[#a8f0eb] focus:border-[#1bc5bd] focus:ring-[#1bc5bd]"
                       : "border-orange-300 focus:border-orange-500 focus:ring-orange-500"
                     : ""
                 }`}
@@ -1047,7 +1091,7 @@ function SearchStep({
               {pinflTouched && pinfl && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
                   {pinflValidation.valid ? (
-                    <CheckCircle2 size={20} className="text-green-500" />
+                    <CheckCircle2 size={20} className="text-[#1bc5bd]" />
                   ) : (
                     <AlertCircle size={20} className="text-orange-500" />
                   )}
@@ -1091,7 +1135,7 @@ function SearchStep({
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="flex items-center gap-1 text-green-600 text-xs font-medium"
+                        className="flex items-center gap-1 text-[#1bc5bd] text-xs font-medium"
                       >
                         <CheckCircle2 size={14} />
                       </motion.div>
@@ -1130,7 +1174,7 @@ function SearchStep({
                   className={`h-12 pr-10 ${
                     passportTouched && passport
                       ? passportValidation.valid
-                        ? "border-green-300 focus:border-green-500 focus:ring-green-500"
+                        ? "border-[#a8f0eb] focus:border-[#1bc5bd] focus:ring-[#1bc5bd]"
                         : "border-orange-300 focus:border-orange-500 focus:ring-orange-500"
                       : ""
                   }`}
@@ -1140,7 +1184,7 @@ function SearchStep({
                 {passportTouched && passport && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {passportValidation.valid ? (
-                      <CheckCircle2 size={20} className="text-green-500" />
+                      <CheckCircle2 size={20} className="text-[#1bc5bd]" />
                     ) : (
                       <AlertCircle size={20} className="text-orange-500" />
                     )}
@@ -1215,7 +1259,7 @@ function SearchStep({
           <TooltipTrigger asChild>
             <Button
               onClick={handleSearch}
-              disabled={isSearching || isQuotaEmpty || !consentChecked}
+              disabled={isSearching || !consentChecked}
               size="lg"
               className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-12 text-base font-medium shadow-lg shadow-teal-600/30 disabled:opacity-50"
             >
@@ -1318,7 +1362,7 @@ function NotFoundAlert({ setCurrentStep }: any) {
           <Button
             variant="outline"
             onClick={() => setCurrentStep("manual")}
-            className="border-blue-300 hover:bg-blue-50 text-blue-700 font-medium"
+            className="border-[#4a7dff]/40 hover:bg-[#4a7dff]/5 text-[#4a7dff] font-medium"
           >
             <UserPlus size={16} className="mr-2" />
             Добавить вручную
@@ -1453,7 +1497,6 @@ function ResultStep({
   selectedMergeCard,
   setSelectedMergeCard,
   isSaving,
-  isQuotaEmpty,
   handleUpdateData,
   handleMergeSelect,
   handleEmploymentAction,
@@ -1544,17 +1587,17 @@ function ResultStep({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-4 shadow-sm"
+          className="bg-gradient-to-br from-[#e6f9f8] to-[#d1f4f2] border-2 border-[#a8f0eb] rounded-lg p-4 shadow-sm"
         >
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 size={20} className="text-green-600" />
+            <div className="w-10 h-10 bg-[#d1f4f2] rounded-full flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 size={20} className="text-[#1bc5bd]" />
             </div>
             <div>
-              <h3 className="font-semibold text-green-900 mb-0.5">
+              <h3 className="font-semibold text-[#138b86] mb-0.5">
                 Данные обновлены
               </h3>
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-[#138b86]">
                 Данные сотрудника успешно обновлены из госбазы и подтверждены
               </p>
             </div>
@@ -1566,17 +1609,17 @@ function ResultStep({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-lg p-4 shadow-sm"
+          className="bg-gradient-to-br from-[#e6f9f8] to-[#d1f4f2] border-2 border-[#a8f0eb] rounded-lg p-4 shadow-sm"
         >
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 size={20} className="text-teal-600" />
+            <div className="w-10 h-10 bg-[#d1f4f2] rounded-full flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 size={20} className="text-[#1bc5bd]" />
             </div>
             <div>
-              <h3 className="font-semibold text-teal-900 mb-0.5">
+              <h3 className="font-semibold text-[#138b86] mb-0.5">
                 Новый сотрудник найден
               </h3>
-              <p className="text-sm text-teal-700">
+              <p className="text-sm text-[#138b86]">
                 Данные получены из госбазы и готовы для оформления
               </p>
             </div>
@@ -1653,7 +1696,6 @@ function ResultStep({
               status={getSmartPanelStatus()}
               employmentStatus="not-working"
               isSaving={isSaving}
-              isQuotaEmpty={isQuotaEmpty}
               onHire={() => handleEmploymentAction("work", { phone: phoneNumber, email })}
               onGPH={() => handleEmploymentAction("gph", { phone: phoneNumber, email })}
               onSave={() => handleEmploymentAction("save", { phone: phoneNumber, email })}
@@ -1693,14 +1735,16 @@ function EmployeeCard({
     >
       {/* Header */}
       <div className="flex items-start gap-3 mb-4 pb-4 border-b border-gray-200">
-        <Avatar className="w-12 h-12 ring-2 ring-gray-100">
-          <AvatarImage
-            src={searchResult?.photoUrl || existingEmployee?.photoUrl}
-          />
-          <AvatarFallback className="bg-gradient-to-br from-teal-400 to-teal-600 text-white text-base font-semibold">
-            {searchResult?.firstName?.[0] || existingEmployee?.name?.[0] || "?"}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="w-12 h-12 ring-2 ring-gray-100">
+            <AvatarImage
+              src={searchResult?.photoUrl || existingEmployee?.photoUrl}
+            />
+            <AvatarFallback className="bg-gradient-to-br from-teal-400 to-teal-600 text-white text-base font-semibold">
+              {searchResult?.firstName?.[0] || existingEmployee?.name?.[0] || "?"}
+            </AvatarFallback>
+          </Avatar>
+        </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-base font-semibold text-gray-900">
@@ -1712,10 +1756,10 @@ function EmployeeCard({
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="inline-flex items-center text-blue-600"
+                className="inline-flex items-center text-[#1bc5bd]"
                 title="Подтвержден"
               >
-                <Shield size={16} />
+                <CheckCircle2 size={16} />
               </motion.span>
             ) : (
               <motion.span
@@ -1749,6 +1793,8 @@ function EmployeeCard({
         </div>
       </div>
 
+
+
       {/* Government Data */}
       <div className="mb-4">
         <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
@@ -1763,6 +1809,7 @@ function EmployeeCard({
               </div>
             </div>
           )}
+          
           {searchResult?.passport && (
             <div>
               <Label className="text-xs text-gray-500 mb-1 block">Паспорт</Label>
@@ -1771,6 +1818,7 @@ function EmployeeCard({
               </div>
             </div>
           )}
+          
           {searchResult?.birthDate && (
             <div>
               <Label className="text-xs text-gray-500 mb-1 block">Дата рождения</Label>
@@ -1787,6 +1835,7 @@ function EmployeeCard({
               </div>
             </div>
           )}
+          
           {searchResult?.nationality && (
             <div>
               <Label className="text-xs text-gray-500 mb-1 block">Национальность</Label>
@@ -1795,6 +1844,7 @@ function EmployeeCard({
               </div>
             </div>
           )}
+          
           {searchResult?.region && (
             <div>
               <Label className="text-xs text-gray-500 mb-1 block">Регион</Label>
@@ -1803,6 +1853,7 @@ function EmployeeCard({
               </div>
             </div>
           )}
+          
           {searchResult?.address && (
             <div className="col-span-3">
               <Label className="text-xs text-gray-500 mb-1 block">Адрес</Label>
@@ -1830,7 +1881,7 @@ function EmployeeCard({
             className="bg-gradient-to-br from-blue-50 to-teal-50 border border-blue-200 rounded-lg p-3 mb-3"
           >
             <div className="flex items-start gap-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-[#4a7dff] rounded-full flex items-center justify-center flex-shrink-0">
                 <Phone size={16} className="text-white" />
               </div>
               <div className="flex-1">
@@ -1847,7 +1898,7 @@ function EmployeeCard({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="phone" className="text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
-                <Phone size={12} className="text-blue-500" />
+                <Phone size={12} className="text-[#4a7dff]" />
                 Телефон
               </Label>
               <Input
@@ -1855,7 +1906,7 @@ function EmployeeCard({
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="+998 90 123 45 67"
-                className={`h-9 text-sm transition-all ${phoneNumber ? 'border-teal-400 bg-teal-50/50 focus:border-teal-500 focus:ring-teal-500' : 'focus:border-blue-400 focus:ring-blue-400'}`}
+                className={`h-9 text-sm transition-all ${phoneNumber ? 'border-[#4a7dff]/60 bg-[#4a7dff]/5 focus:border-[#4a7dff] focus:ring-4 focus:ring-[#4a7dff]/20' : 'focus:border-[#4a7dff] focus:ring-4 focus:ring-[#4a7dff]/20'}`}
               />
             </div>
             <div>
@@ -1869,7 +1920,7 @@ function EmployeeCard({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="example@mail.com"
-                className={`h-9 text-sm transition-all ${email ? 'border-teal-400 bg-teal-50/50 focus:border-teal-500 focus:ring-teal-500' : 'focus:border-blue-400 focus:ring-blue-400'}`}
+                className={`h-9 text-sm transition-all ${email ? 'border-[#4a7dff]/60 bg-[#4a7dff]/5 focus:border-[#4a7dff] focus:ring-4 focus:ring-[#4a7dff]/20' : 'focus:border-[#4a7dff] focus:ring-4 focus:ring-[#4a7dff]/20'}`}
               />
             </div>
           </div>
@@ -1923,7 +1974,7 @@ function MergeConflictCards({
               onClick={() => setSelectedMergeCard("local")}
               className={`w-full bg-gradient-to-br from-white to-gray-50 border-2 rounded-lg p-3 text-left transition-all ${
                 selectedMergeCard === "local"
-                  ? "border-teal-500 ring-2 ring-teal-500/20 shadow-lg"
+                  ? "border-[#4a7dff] ring-2 ring-[#4a7dff]/20 shadow-lg"
                   : "border-gray-200 hover:border-gray-300 hover:shadow-md"
               }`}
             >
@@ -1936,7 +1987,7 @@ function MergeConflictCards({
               </Avatar>
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                 selectedMergeCard === "local"
-                  ? "border-teal-500 bg-teal-500"
+                  ? "border-[#4a7dff] bg-[#4a7dff]"
                   : "border-gray-300 bg-white"
               }`}>
                 {selectedMergeCard === "local" && (
@@ -1994,7 +2045,7 @@ function MergeConflictCards({
               onClick={() => setSelectedMergeCard("government")}
               className={`w-full bg-gradient-to-br from-white to-gray-50 border-2 rounded-lg p-3 text-left transition-all ${
                 selectedMergeCard === "government"
-                  ? "border-teal-500 ring-2 ring-teal-500/20 shadow-lg"
+                  ? "border-[#4a7dff] ring-2 ring-[#4a7dff]/20 shadow-lg"
                   : "border-gray-200 hover:border-gray-300 hover:shadow-md"
               }`}
             >
@@ -2007,7 +2058,7 @@ function MergeConflictCards({
               </Avatar>
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                 selectedMergeCard === "government"
-                  ? "border-teal-500 bg-teal-500"
+                  ? "border-[#4a7dff] bg-[#4a7dff]"
                   : "border-gray-300 bg-white"
               }`}>
                 {selectedMergeCard === "government" && (
@@ -2020,8 +2071,8 @@ function MergeConflictCards({
                 {searchResult?.lastName} {searchResult?.firstName}{" "}
                 {searchResult?.middleName}
               </h3>
-              <span className="inline-flex items-center text-blue-600" title="Подтвержден">
-                <Shield size={14} />
+              <span className="inline-flex items-center text-[#1bc5bd]" title="Подтвержден">
+                <CheckCircle2 size={14} />
               </span>
             </div>
             <div className="mb-2">
@@ -2314,7 +2365,7 @@ function ManualStep({
               type="button"
               onClick={() => handleEmploymentAction("work")}
               disabled={isSaving || !isFormValid}
-              className="group bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-8 hover:border-teal-500 hover:shadow-xl transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-8 hover:border-[#4a7dff] hover:shadow-xl transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="w-16 h-16 mx-auto mb-4 bg-teal-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                 {isSaving && currentAction === "work" ? (
@@ -2341,13 +2392,13 @@ function ManualStep({
               type="button"
               onClick={() => handleEmploymentAction("gph")}
               disabled={isSaving || !isFormValid}
-              className="group bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-8 hover:border-blue-500 hover:shadow-xl transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-8 hover:border-[#4a7dff] hover:shadow-xl transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 mx-auto mb-4 bg-[#4a7dff]/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                 {isSaving && currentAction === "gph" ? (
-                  <Loader2 size={32} className="text-blue-600 animate-spin" />
+                  <Loader2 size={32} className="text-[#4a7dff] animate-spin" />
                 ) : (
-                  <FileText size={32} className="text-blue-600" />
+                  <FileText size={32} className="text-[#4a7dff]" />
                 )}
               </div>
               <h4 className="font-semibold text-gray-900 mb-2 text-lg">
