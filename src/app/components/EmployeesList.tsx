@@ -8,34 +8,10 @@ import { EmployeeWizard } from "./EmployeeWizard";
 export function EmployeesList() {
   const navigate = useNavigate();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [isQuotaEmpty, setIsQuotaEmpty] = useState(false);
-
-  // Проверяем состояние квоты при монтировании и изменениях
-  useEffect(() => {
-    const checkQuotaStatus = () => {
-      const quotaEmpty = localStorage.getItem("verifix_test_quota_empty") === "true";
-      setIsQuotaEmpty(quotaEmpty);
-    };
-
-    checkQuotaStatus();
-
-    // Слушаем изменения в localStorage
-    const handleStorageChange = () => {
-      checkQuotaStatus();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
 
   const handleAddEmployee = () => {
-    if (isQuotaEmpty) {
-      // Если квота исчерпана - переходим на страницу ручного создания
-      navigate("/employee/create");
-    } else {
-      // Если квота есть - открываем визард поиска
-      setIsWizardOpen(true);
-    }
+    // Всегда открываем визард, независимо от квоты
+    setIsWizardOpen(true);
   };
 
   return (

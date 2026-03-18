@@ -38,11 +38,13 @@ import {
   GitMerge,
   Clock,
   Phone,
+  Sparkles,
   Mail,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { SmartPanelActions } from "./employee-actions/SmartPanelActions";
 import { HireEmployeeForm, HireFormData } from "./employee-actions/HireEmployeeForm";
+import svgPaths from "../../imports/svg-koah8l8mbh";
 
 type WizardStep = "search" | "result" | "manual";
 type SearchState =
@@ -91,6 +93,46 @@ interface EmployeeWizardProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+}
+
+// Premium Sparkles Icon with Gradient
+function PremiumSparklesIcon() {
+  return (
+    <svg className="size-3" fill="none" viewBox="0 0 12 12">
+      <g clipPath="url(#clip0_71_1026)">
+        <path d={svgPaths.pecd8080} stroke="url(#paint0_linear_71_1026)" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M10 1.5V3.5" stroke="url(#paint1_linear_71_1026)" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M11 2.5H9" stroke="url(#paint2_linear_71_1026)" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 8.5V9.5" stroke="url(#paint3_linear_71_1026)" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2.5 9H1.5" stroke="url(#paint4_linear_71_1026)" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+      <defs>
+        <linearGradient gradientUnits="userSpaceOnUse" id="paint0_linear_71_1026" x1="3.1423" x2="10.1958" y1="6.26621" y2="11.804">
+          <stop stopColor="#2D74FF" />
+          <stop offset="1" stopColor="#AA22FF" />
+        </linearGradient>
+        <linearGradient gradientUnits="userSpaceOnUse" id="paint1_linear_71_1026" x1="10.2141" x2="11.202" y1="2.55324" y2="2.94103">
+          <stop stopColor="#2D74FF" />
+          <stop offset="1" stopColor="#AA22FF" />
+        </linearGradient>
+        <linearGradient gradientUnits="userSpaceOnUse" id="paint2_linear_71_1026" x1="9.4283" x2="10.0862" y1="3.02662" y2="4.05975">
+          <stop stopColor="#2D74FF" />
+          <stop offset="1" stopColor="#AA22FF" />
+        </linearGradient>
+        <linearGradient gradientUnits="userSpaceOnUse" id="paint3_linear_71_1026" x1="2.21415" x2="2.91948" y1="9.02662" y2="9.58038">
+          <stop stopColor="#2D74FF" />
+          <stop offset="1" stopColor="#AA22FF" />
+        </linearGradient>
+        <linearGradient gradientUnits="userSpaceOnUse" id="paint4_linear_71_1026" x1="1.71415" x2="2.41948" y1="9.52662" y2="10.0804">
+          <stop stopColor="#2D74FF" />
+          <stop offset="1" stopColor="#AA22FF" />
+        </linearGradient>
+        <clipPath id="clip0_71_1026">
+          <rect fill="white" height="12" width="12" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
 }
 
 // Helper: Format PINFL as 12345 67890 1234
@@ -177,6 +219,11 @@ export function EmployeeWizard({
   const [currentQuota, setCurrentQuota] = useState(86);
   const isQuotaLow = currentQuota <= 5;
   const quotaPercentage = (currentQuota / maxQuota) * 100;
+  
+  // Test mode for quota empty
+  const [testQuotaEmpty, setTestQuotaEmpty] = useState(() => {
+    return localStorage.getItem("verifix_test_quota_empty") === "true";
+  });
 
   // Search form fields
   const [pinfl, setPinfl] = useState("");
@@ -225,6 +272,17 @@ export function EmployeeWizard({
   const searchResultRef = useRef<HTMLDivElement>(null);
   const pinflInputRef = useRef<HTMLInputElement>(null);
   const passportInputRef = useRef<HTMLInputElement>(null);
+
+  // Listen for test quota empty changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const value = localStorage.getItem("verifix_test_quota_empty") === "true";
+      setTestQuotaEmpty(value);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   // Autofocus on first input when wizard opens
   useEffect(() => {
@@ -537,6 +595,12 @@ export function EmployeeWizard({
         return;
       }
     } else {
+      // Check quota for passport search (premium feature)
+      if (testQuotaEmpty || currentQuota === 0) {
+        toast.error("Квота исчерпана. Поиск по паспорту недоступен.");
+        return;
+      }
+      
       if (!passport || !birthDate) {
         toast.error("Заполните паспорт и дату рождения");
         return;
@@ -822,60 +886,6 @@ export function EmployeeWizard({
         <div className={`flex flex-col items-center gap-4 w-full ${
           currentStep === "search" ? "max-w-2xl" : "max-w-6xl"
         }`}>
-          {/* Quota Panel */}
-          {currentStep === "search" && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="w-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 shadow-lg border border-blue-200"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Info size={18} className="text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-blue-900">
-                      Квота: Март 2026
-                    </h3>
-                    <p className="text-xs text-blue-700">
-                      {isQuotaLow
-                        ? `Осталось ${currentQuota} запросов`
-                        : "Доступно запросов к госбазе"}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold text-blue-900">
-                    {currentQuota}
-                  </div>
-                  <div className="text-xs text-blue-700">из {maxQuota}</div>
-                </div>
-              </div>
-              
-              {/* Animated Progress Bar */}
-              <div className="relative w-full bg-blue-200 rounded-full h-2.5 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${quotaPercentage}%` }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className={`h-full rounded-full transition-colors duration-500 ${
-                    isQuotaLow
-                      ? "bg-orange-500"
-                      : "bg-gradient-to-r from-[#1bc5bd] to-[#0ea89e]"
-                  }`}
-                >
-                  <div className="h-full w-full bg-white/20 animate-pulse" />
-                </motion.div>
-              </div>
-              
-              <p className="text-xs text-blue-600 mt-2.5">
-                Поиск в госбазе и обновление данных расходуют квоту
-              </p>
-            </motion.div>
-          )}
-
           {/* Modal Window */}
           <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -894,13 +904,21 @@ export function EmployeeWizard({
                 <UserPlus size={24} className="text-[#4a7dff]" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {currentStep === "search" && "Добавить сотрудника"}
-                  {currentStep === "result" && "Результат поиска"}
-                  {currentStep === "manual" && "Ручное добавление"}
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    {currentStep === "search" && "Добавить сотрудника"}
+                    {currentStep === "result" && "Результат поиска"}
+                    {currentStep === "manual" && "Ручное добавление"}
+                  </h2>
+                  {currentStep === "search" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-gradient-to-r from-[#2D74FF] to-[#AA22FF] text-white">
+                      <Sparkles size={11} />
+                      Premium
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-500">
-                  {currentStep === "search" && "Поиск в государствен��ой базе данных"}
+                  {currentStep === "search" && "Поиск в государственной базе данных"}
                   {currentStep === "result" && "Проверка и подтверждение данных"}
                   {currentStep === "manual" && "Заполнение информации вручную"}
                 </p>
@@ -942,6 +960,10 @@ export function EmployeeWizard({
                   isSearching={isSearching}
                   handleSearch={handleSearch}
                   setCurrentStep={setCurrentStep}
+                  currentQuota={currentQuota}
+                  maxQuota={maxQuota}
+                  quotaPercentage={quotaPercentage}
+                  isQuotaLow={isQuotaLow}
                   searchState={searchState}
                   searchResultRef={searchResultRef}
                   pinflInputRef={pinflInputRef}
@@ -951,6 +973,8 @@ export function EmployeeWizard({
                   passportTouched={passportTouched}
                   setPassportTouched={setPassportTouched}
                   handleNavigateToCreate={handleNavigateToCreate}
+                  testQuotaEmpty={testQuotaEmpty}
+                  navigate={navigate}
                 />
               )}
 
@@ -1027,9 +1051,12 @@ function SearchStep({
   passportTouched,
   setPassportTouched,
   handleNavigateToCreate,
+  testQuotaEmpty,
+  navigate,
 }: any) {
   const pinflValidation = pinfl ? validatePinfl(pinfl.replace(/\s/g, "")) : { valid: false };
   const passportValidation = passport ? validatePassport(passport.replace(/\s/g, "")) : { valid: false };
+  const isQuotaEmpty = testQuotaEmpty || currentQuota === 0;
 
   const handlePinflChange = (value: string) => {
     const formatted = formatPinfl(value);
@@ -1048,7 +1075,16 @@ function SearchStep({
         <label className="block text-sm font-medium text-gray-700 mb-2.5">
           Способ поиска
         </label>
-        <div className="inline-flex items-center bg-gray-100 p-1.5 rounded-lg">
+        <div className="relative inline-flex items-center bg-gray-100 p-1.5 rounded-lg">
+          {isQuotaEmpty && (
+            <button
+              type="button"
+              onClick={() => navigate('/settings')}
+              className="absolute -top-2 -right-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#4a7dff] text-white shadow-md z-10 hover:bg-[#3a6de8] transition-colors cursor-pointer"
+            >
+              Update
+            </button>
+          )}
           <button
             type="button"
             onClick={() => {
@@ -1066,25 +1102,28 @@ function SearchStep({
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            По ПИНФЛ
+            ПИНФЛ
           </button>
           <button
             type="button"
             onClick={() => {
-              if (searchMethod !== "passport") {
+              if (searchMethod !== "passport" && !isQuotaEmpty) {
                 setSearchMethod("passport");
                 setPinfl("");
                 setPinflTouched(false);
                 setTimeout(() => passportInputRef.current?.focus(), 100);
               }
             }}
+            disabled={isQuotaEmpty}
             className={`px-6 py-2.5 rounded-md transition-all font-medium ${
               searchMethod === "passport"
                 ? "bg-white shadow-sm text-gray-900"
+                : isQuotaEmpty
+                ? "text-gray-400 cursor-not-allowed"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            По паспорту
+            Паспорт
           </button>
         </div>
       </div>
@@ -1157,36 +1196,7 @@ function SearchStep({
               )}
             </div>
             
-            <div className="flex items-start justify-between mt-2">
-              <p className="text-sm text-gray-500">
-                Введите 14-значный ПИНФЛ сотрудника
-              </p>
-              
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="text-gray-400 hover:text-gray-600">
-                    <HelpCircle size={16} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="text-xs space-y-1.5 max-w-xs">
-                    <p className="font-semibold">Формат ПИНФЛ:</p>
-                    <p>• 14 цифр</p>
-                    <p>• Пример: 12345 67890 1234</p>
-                    <div className="border-t border-gray-200 pt-1.5 mt-1.5">
-                      <p className="font-semibold mb-1">Будут загружены данные:</p>
-                      <p>• ФИО (Фамилия, Имя, Отчество)</p>
-                      <p>• Фотография</p>
-                      <p>• Пол</p>
-                      <p>• Дата рождения</p>
-                      <p>• ИИН</p>
-                      <p>• Адрес регистрации</p>
-                      <p>• Гражданство</p>
-                    </div>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
@@ -1239,8 +1249,11 @@ function SearchStep({
                   onBlur={() => setPassportTouched(true)}
                   placeholder="AB 1234567"
                   maxLength={10}
+                  disabled={isQuotaEmpty}
                   className={`h-12 pr-10 ${
-                    passportTouched && passport
+                    isQuotaEmpty 
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : passportTouched && passport
                       ? passportValidation.valid
                         ? "border-[#a8f0eb] focus:border-[#1bc5bd] focus:ring-[#1bc5bd]"
                         : "border-orange-300 focus:border-orange-500 focus:ring-orange-500"
@@ -1260,41 +1273,11 @@ function SearchStep({
                 )}
               </div>
               
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-sm text-gray-500">
-                  Формат: AA 1234567
-                </p>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="text-gray-400 hover:text-gray-600">
-                      <HelpCircle size={16} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="text-xs space-y-1.5 max-w-xs">
-                      <p className="font-semibold">Формат паспорта:</p>
-                      <p>• 2 заглавные буквы</p>
-                      <p>• 7 цифр</p>
-                      <p>• Пример: AB 1234567</p>
-                      <div className="border-t border-gray-200 pt-1.5 mt-1.5">
-                        <p className="font-semibold mb-1">Будут загружены данные:</p>
-                        <p>• ФИО (Фамилия, Имя, Отчество)</p>
-                        <p>• Фотография</p>
-                        <p>• Пол</p>
-                        <p>• Дата рождения</p>
-                        <p>• ИИН</p>
-                        <p>• Адрес регистрации</p>
-                        <p>• Гражданство</p>
-                      </div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
+              
             </div>
             
             <div>
-              <Label htmlFor="birthDate" className="text-sm font-semibold text-gray-700 mb-2 block">
+              <Label htmlFor="birthDate" className={`text-sm font-semibold mb-2 block ${isQuotaEmpty ? 'text-gray-400' : 'text-gray-700'}`}>
                 Дата рождения <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -1302,30 +1285,111 @@ function SearchStep({
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
-                className="h-12"
+                disabled={isQuotaEmpty}
+                className={`h-12 ${isQuotaEmpty ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''}`}
               />
             </div>
           </div>
         )}
       </div>
 
-
+      {/* Data Badges */}
+      <div className="flex flex-wrap gap-2 mt-3">
+        {/* Free badges */}
+        <span className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+          ФИО
+        </span>
+        <span className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+          Дата рождения
+        </span>
+        <span className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+          Пол
+        </span>
+        <span className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+          Адрес
+        </span>
+        
+        {/* Premium badges */}
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border ${
+          isQuotaEmpty 
+            ? 'bg-gray-50 text-gray-400 border-gray-200 opacity-60' 
+            : 'border-[#2d74ff]'
+        }`} style={isQuotaEmpty ? {} : { backgroundImage: 'linear-gradient(90.3073deg, rgba(45, 116, 255, 0.12) 0%, rgba(170, 34, 255, 0.12) 100.88%)' }}>
+          {isQuotaEmpty ? (
+            <Sparkles size={12} className="text-gray-400" />
+          ) : (
+            <PremiumSparklesIcon />
+          )}
+          <span className={isQuotaEmpty ? 'line-through' : 'bg-clip-text text-transparent'} style={isQuotaEmpty ? {} : { backgroundImage: 'linear-gradient(164.402deg, rgb(45, 116, 255) 35.158%, rgb(170, 34, 255) 99.024%)' }}>
+            Фотография
+          </span>
+        </span>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border ${
+          isQuotaEmpty 
+            ? 'bg-gray-50 text-gray-400 border-gray-200 opacity-60' 
+            : 'border-[#2d74ff]'
+        }`} style={isQuotaEmpty ? {} : { backgroundImage: 'linear-gradient(90.3073deg, rgba(45, 116, 255, 0.12) 0%, rgba(170, 34, 255, 0.12) 100.88%)' }}>
+          {isQuotaEmpty ? (
+            <Sparkles size={12} className="text-gray-400" />
+          ) : (
+            <PremiumSparklesIcon />
+          )}
+          <span className={isQuotaEmpty ? 'line-through' : 'bg-clip-text text-transparent'} style={isQuotaEmpty ? {} : { backgroundImage: 'linear-gradient(164.402deg, rgb(45, 116, 255) 35.158%, rgb(170, 34, 255) 99.024%)' }}>
+            Национальность
+          </span>
+        </span>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border ${
+          isQuotaEmpty 
+            ? 'bg-gray-50 text-gray-400 border-gray-200 opacity-60' 
+            : 'border-[#2d74ff]'
+        }`} style={isQuotaEmpty ? {} : { backgroundImage: 'linear-gradient(90.3073deg, rgba(45, 116, 255, 0.12) 0%, rgba(170, 34, 255, 0.12) 100.88%)' }}>
+          {isQuotaEmpty ? (
+            <Sparkles size={12} className="text-gray-400" />
+          ) : (
+            <PremiumSparklesIcon />
+          )}
+          <span className={isQuotaEmpty ? 'line-through' : 'bg-clip-text text-transparent'} style={isQuotaEmpty ? {} : { backgroundImage: 'linear-gradient(164.402deg, rgb(45, 116, 255) 35.158%, rgb(170, 34, 255) 99.024%)' }}>
+            Регион
+          </span>
+        </span>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border ${
+          isQuotaEmpty 
+            ? 'bg-gray-50 text-gray-400 border-gray-200 opacity-60' 
+            : 'border-[#2d74ff]'
+        }`} style={isQuotaEmpty ? {} : { backgroundImage: 'linear-gradient(90.3073deg, rgba(45, 116, 255, 0.12) 0%, rgba(170, 34, 255, 0.12) 100.88%)' }}>
+          {isQuotaEmpty ? (
+            <Sparkles size={12} className="text-gray-400" />
+          ) : (
+            <PremiumSparklesIcon />
+          )}
+          <span className={isQuotaEmpty ? 'line-through' : 'bg-clip-text text-transparent'} style={isQuotaEmpty ? {} : { backgroundImage: 'linear-gradient(164.402deg, rgb(45, 116, 255) 35.158%, rgb(170, 34, 255) 99.024%)' }}>
+            {searchMethod === "passport" ? "ПИНФЛ" : "Серия паспорта"}
+          </span>
+        </span>
+      </div>
 
       {/* Consent Checkbox */}
-      <div className="flex items-center gap-2.5">
+      <div 
+        onClick={() => setConsentChecked(!consentChecked)}
+        className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all ${
+          consentChecked 
+            ? 'bg-blue-50' 
+            : 'bg-[#F9FAFB] hover:bg-gray-100'
+        }`}
+      >
         <Checkbox
           id="consent"
           checked={consentChecked}
           onCheckedChange={(checked) => setConsentChecked(checked as boolean)}
-          className="shrink-0"
+          className="shrink-0 pointer-events-none"
         />
-        <Label htmlFor="consent" className="text-sm text-gray-700 cursor-pointer">
+        <label className="text-sm text-gray-700 cursor-pointer leading-relaxed">
           Даю согласие на обработку персональных данных в соответствии с <a href="#" onClick={(e) => e.preventDefault()} className="text-[#4a7dff] hover:text-[#3a6de8] underline font-medium transition-colors">политикой конфиденциальности</a>
-        </Label>
+        </label>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-end gap-3 pt-5">
+      <div className="flex items-center justify-end gap-3 p-[0px]">
         <Button
           variant="outline"
           onClick={handleNavigateToCreate}
@@ -1339,7 +1403,7 @@ function SearchStep({
           <TooltipTrigger asChild>
             <Button
               onClick={handleSearch}
-              disabled={isSearching || !consentChecked}
+              disabled={isSearching || !consentChecked || (searchMethod === "passport" && isQuotaEmpty)}
               className="bg-[#4a7dff] hover:bg-[#3a6de8] text-white px-7 h-10 shadow-md shadow-blue-500/25 disabled:opacity-50"
             >
               {isSearching ? (
@@ -1362,12 +1426,23 @@ function SearchStep({
               )}
             </Button>
           </TooltipTrigger>
-          {!consentChecked && (
+          {!consentChecked ? (
             <TooltipContent>
               <p className="text-xs">Необходимо дать согласие</p>
             </TooltipContent>
-          )}
+          ) : searchMethod === "passport" && isQuotaEmpty ? (
+            <TooltipContent>
+              <p className="text-xs">Квота исчерпана. Поиск по паспорту недоступен.</p>
+            </TooltipContent>
+          ) : null}
         </Tooltip>
+      </div>
+
+      {/* Quota Info */}
+      <div className="text-center">
+        <p className="text-sm text-gray-600">
+          Осталось запросов: <span className={`font-semibold ${currentQuota <= 10 ? 'text-orange-600' : 'text-gray-900'}`}>{currentQuota}</span> / {maxQuota}
+        </p>
       </div>
 
       {/* Search Result Notifications */}
@@ -1393,49 +1468,41 @@ function SearchStep({
 // Notification Components
 function NotFoundAlert({ setCurrentStep, handleNavigateToCreate }: any) {
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4 shadow-sm">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <HelpCircle size={20} className="text-blue-600" />
+    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-lg p-3 shadow-sm">
+      <div className="flex items-start gap-2.5">
+        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <HelpCircle size={16} className="text-blue-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-base font-semibold text-blue-900 mb-1.5">
-            Не найдено в госба��е
+          <h3 className="text-sm font-semibold text-blue-900 mb-1">
+            Не найдено в госбазе
           </h3>
-          <p className="text-sm text-blue-700 mb-3 leading-relaxed">
+          <p className="text-xs text-blue-700 mb-2 leading-relaxed">
             По указанным данным информация в государственной базе не найдена.
             Возможно, данные были введены некорректно или сотрудник отсутствует
             в системе.
           </p>
-          <div className="bg-white/60 rounded-lg p-3 mb-3">
-            <p className="font-semibold text-blue-900 mb-1.5 text-sm">Рекомендации:</p>
-            <ul className="space-y-1.5">
-              <li className="flex items-start gap-2 text-sm text-blue-700">
+          <div className="bg-white/60 rounded-lg p-2">
+            <p className="font-semibold text-blue-900 mb-1 text-xs">Рекомендации:</p>
+            <ul className="space-y-1">
+              <li className="flex items-start gap-1.5 text-xs text-blue-700">
                 <span className="text-blue-400 mt-0.5">•</span>
                 <span>Проверьте правильность введенного ПИНФЛ или паспорта</span>
               </li>
-              <li className="flex items-start gap-2 text-sm text-blue-700">
+              <li className="flex items-start gap-1.5 text-xs text-blue-700">
                 <span className="text-blue-400 mt-0.5">•</span>
                 <span>Убедитесь, что дата рождения указана верно</span>
               </li>
-              <li className="flex items-start gap-2 text-sm text-blue-700">
+              <li className="flex items-start gap-1.5 text-xs text-blue-700">
                 <span className="text-blue-400 mt-0.5">•</span>
                 <span>Попробуйте использовать альтернативный способ поиска</span>
               </li>
-              <li className="flex items-start gap-2 text-sm text-blue-700">
+              <li className="flex items-start gap-1.5 text-xs text-blue-700">
                 <span className="text-blue-400 mt-0.5">•</span>
                 <span>Добавьте сотрудника вручную, если данные отсутствуют в госбазе</span>
               </li>
             </ul>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleNavigateToCreate}
-            className="border-[#4a7dff]/40 hover:bg-[#4a7dff]/5 text-[#4a7dff] font-medium h-9"
-          >
-            <UserPlus size={16} className="mr-2" />
-            Добавить вручную
-          </Button>
         </div>
       </div>
     </div>
@@ -1466,7 +1533,7 @@ function InvalidInputAlert() {
               </li>
               <li className="flex items-start gap-2 text-sm text-orange-700">
                 <span className="text-orange-400 mt-0.5">•</span>
-                <span>Неверная серия или номер ��аспорта</span>
+                <span>Неверная серия или номер паспорта</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-orange-700">
                 <span className="text-orange-400 mt-0.5">•</span>
@@ -2288,7 +2355,7 @@ function ManualStep({
           <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
             <UserPlus size={20} className="text-teal-600" />
           </div>
-          Личн��е данные
+          Личные данные
         </h3>
         <div className="grid grid-cols-2 gap-6">
           <div>
@@ -2538,7 +2605,7 @@ function ManualStep({
           </TooltipTrigger>
           {!isFormValid && (
             <TooltipContent>
-              <p className="text-xs">Заполните обязательные поля: Фа��илия, Имя, Дата рождения</p>
+              <p className="text-xs">Заполните обязательные поля: Фамилия, Имя, Дата рождения</p>
             </TooltipContent>
           )}
         </Tooltip>
